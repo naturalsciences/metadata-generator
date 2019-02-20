@@ -30,7 +30,7 @@ import static java.util.Collections.singleton;
  *
  * @author thomas
  * 
- * "The creation of ATOM dataset feeds with this class has not been used in production.
+ * The creation of ATOM dataset feeds with this class has not been used in production.
  */
  @Deprecated
 public class AtomFeedDatasetBuilder {
