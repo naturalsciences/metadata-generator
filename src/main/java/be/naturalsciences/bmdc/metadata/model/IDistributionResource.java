@@ -5,6 +5,7 @@
  */
 package be.naturalsciences.bmdc.metadata.model;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
@@ -12,7 +13,9 @@ import java.util.List;
  *
  * @author thomas
  */
-public interface IDistributionResource {
+public interface IDistributionResource extends Serializable {
+
+    static final long serialVersionUID = 1L;
 
     OnlinePossibilityEnum getFunction();
 
@@ -26,9 +29,13 @@ public interface IDistributionResource {
 
     void setOnlineResourceProtocol(ProtocolEnum onlineResourceProtocol);
 
-    String getOnlineResourceName();
+    String getOnlineResourceIdentifier();
 
-    void setOnlineResourceName(String onlineResourceName);
+    void setOnlineResourceIdentifier(String onlineResourceIdentifier);
+
+    String getOnlineResourceDescriptiveName();
+
+    void setOnlineResourceDescriptiveName(String onlineResourceDescriptiveName);
 
     String getOnlineResourceDescription();
 

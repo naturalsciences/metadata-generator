@@ -7,12 +7,19 @@ package be.naturalsciences.bmdc.metadata.model.impl;
 
 import be.naturalsciences.bmdc.metadata.model.IDataset;
 import be.naturalsciences.bmdc.metadata.model.IDatasource;
+import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
 import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
+import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
+import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
+import be.naturalsciences.bmdc.utils.LocalizedString;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Dataset implements IDataset {
@@ -41,6 +48,9 @@ public class Dataset implements IDataset {
     private String isoDialect;
     private SpatialType spatialType;
     //private String fileIdentifier;
+    private Set<LocalizedString> multilingualAbstracts;
+    private Set<LocalizedString> multilingualTitles;
+    private Set<LocalizedString> multilingualLineages;
 
     public String getIdentifier() {
         return identifier;
@@ -289,4 +299,38 @@ public class Dataset implements IDataset {
         return "http://metadata.naturalsciences.be/" + identifier;
     }
 
+    @Override
+    public Set<LocalizedString> getMultilingualTitles() {
+        return multilingualTitles;
+    }
+
+    @Override
+    public void setMultilingualTitles(Set<LocalizedString> titles) {
+        this.multilingualTitles = titles;
+    }
+
+    @Override
+    public Set<LocalizedString> getMultilingualAbstracts() {
+        return multilingualAbstracts;
+    }
+
+    @Override
+    public void setMultilingualAbstracts(Set<LocalizedString> abstracts) {
+        this.multilingualAbstracts = abstracts;
+    }
+
+    @Override
+    public Set<LocalizedString> getMultilingualLineages() {
+        return multilingualLineages;
+    }
+
+    @Override
+    public void setMultilingualLineages(Set<LocalizedString> lineages) {
+        this.multilingualLineages = lineages;
+    }
+
+    @Override
+    public boolean addDistributionResource(String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats) throws MalformedURLException, URISyntaxException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

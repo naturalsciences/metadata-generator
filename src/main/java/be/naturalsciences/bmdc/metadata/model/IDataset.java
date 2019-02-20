@@ -5,20 +5,28 @@
  */
 package be.naturalsciences.bmdc.metadata.model;
 
+import be.naturalsciences.bmdc.utils.LocalizedString;
 import be.naturalsciences.bmdc.metadata.model.IDatasource;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
 import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  *
  * @author thomas
  */
-public interface IDataset {
+public interface IDataset extends Serializable {
+
+    static final long serialVersionUID = 1L;
 
     public enum Role {
         DISTRIBUTOR, RESOURCEPROVIDER, COAUTHOR, EDITOR, CONTRIBUTOR, OWNER, USER, STAKEHOLDER, RIGHTS_HOLDER, FUNDER, PUBLISHER, AUTHOR, POINT_OF_CONTACT, PRINCIPAL_INVESTIGATOR, MEDIATOR, PROCESSOR, ORIGINATOR, CUSTODIAN, COLLABORATOR, SPONSOR
@@ -39,6 +47,18 @@ public interface IDataset {
     public String getTitle();
 
     public void setTitle(String title);
+
+    public Set<LocalizedString> getMultilingualTitles();
+
+    public Set<LocalizedString> getMultilingualAbstracts();
+
+    public Set<LocalizedString> getMultilingualLineages();
+
+    public void setMultilingualTitles(Set<LocalizedString> titles);
+
+    public void setMultilingualAbstracts(Set<LocalizedString> abstracts);
+
+    public void setMultilingualLineages(Set<LocalizedString> lineages);
 
     public Date getCreationDate();
 
@@ -104,6 +124,8 @@ public interface IDataset {
 
     public void setDistributionResources(Collection<IDistributionResource> distributionResources);
 
+    public boolean addDistributionResource(String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats) throws MalformedURLException, URISyntaxException;
+
     public void setPointsOfContact(Collection<IInstituteRole> pointsOfContact);
 
     public Collection<IInstituteRole> getPointsOfContact();
@@ -127,5 +149,4 @@ public interface IDataset {
     public String getMetadataUrlXML();
 
     public String getMetadataUrlHuman();
-
 }

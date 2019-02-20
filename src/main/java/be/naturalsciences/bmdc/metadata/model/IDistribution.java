@@ -5,13 +5,16 @@
  */
 package be.naturalsciences.bmdc.metadata.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
  *
  * @author thomas
  */
-public interface IDistribution {
+public interface IDistribution extends Serializable {
+
+    static final long serialVersionUID = 1L;
 
     /* Collection<IDistributionFormat> getDistributionFormats();
 

@@ -5,6 +5,7 @@
  */
 package be.naturalsciences.bmdc.metadata.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,9 @@ import java.util.Set;
  *
  * @author thomas
  */
-public interface IDatasource {
+public interface IDatasource extends Serializable {
+    
+    static final long serialVersionUID = 1L;
 
     public String getTitle();
 
@@ -60,4 +63,8 @@ public interface IDatasource {
     public void setPlatforms(List<IPlatform> platforms);
 
     public List<IRegion> getRegionCollection();
+    
+    public String getBibliographicReference();
+    
+    public void setBibliographicReference (String reference);
 }

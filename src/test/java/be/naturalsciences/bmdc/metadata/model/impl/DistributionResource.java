@@ -5,75 +5,91 @@
  */
 package be.naturalsciences.bmdc.metadata.model.impl;
 
+import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
-import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
 import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
-public class DistributionResource implements IDistributionResource {
+public class DistributionResource implements IDistributionResource,Serializable {
+    
+    static final long serialVersionUID = 1L;
 
     private OnlinePossibilityEnum function;
     private URL onlineResourceUrl;
     private ProtocolEnum onlineResourceProtocol;
-    private String onlineResourceName;
-    private String onlineResourceDescription;
+    //private String onlineResourceName;
+
+    private List<IDistributionFormat> distributionFormats;
     private Double dataSizeInBytes;
     private IInstituteRole distributor;
-    private List<IDistributionFormat> distributionFormats;
+    private String onlineResourceIdentifier;
+    private String onlineResourceDescriptiveName;
+    private String onlineResourceDescription;
 
-    public DistributionResource(OnlinePossibilityEnum function, URL onlineResourceUrl, ProtocolEnum onlineResourceProtocol, String onlineResourceName, String onlineResourceDescription, List<IDistributionFormat> distributionFormats, Double dataSizeInBytes, IInstituteRole distributor) {
+    public DistributionResource(OnlinePossibilityEnum function, URL onlineResourceUrl, ProtocolEnum onlineResourceProtocol, String onlineResourceIdentifier, String onlineResourceDescriptiveName, String onlineResourceDescription, List<IDistributionFormat> distributionFormats, Double dataSizeInBytes, IInstituteRole distributor) {
         this.function = function;
         this.onlineResourceUrl = onlineResourceUrl;
         this.onlineResourceProtocol = onlineResourceProtocol;
-        this.onlineResourceName = onlineResourceName;
-        this.onlineResourceDescription = onlineResourceDescription;
         this.distributionFormats = distributionFormats;
         this.dataSizeInBytes = dataSizeInBytes;
         this.distributor = distributor;
+        this.onlineResourceIdentifier = onlineResourceIdentifier;
+        this.onlineResourceDescriptiveName = onlineResourceDescriptiveName;
+        this.onlineResourceDescription = onlineResourceDescription;
     }
 
+    @Override
     public OnlinePossibilityEnum getFunction() {
         return function;
     }
 
+    @Override
     public void setFunction(OnlinePossibilityEnum function) {
         this.function = function;
     }
 
+    @Override
     public URL getOnlineResourceUrl() {
         return onlineResourceUrl;
     }
 
+    @Override
     public void setOnlineResourceUrl(URL onlineResourceUrl) {
         this.onlineResourceUrl = onlineResourceUrl;
     }
 
+    @Override
     public ProtocolEnum getOnlineResourceProtocol() {
         return onlineResourceProtocol;
     }
 
+    @Override
     public void setOnlineResourceProtocol(ProtocolEnum onlineResourceProtocol) {
         this.onlineResourceProtocol = onlineResourceProtocol;
-    }
-
-    public String getOnlineResourceName() {
-        return onlineResourceName;
-    }
-
-    public void setOnlineResourceName(String onlineResourceName) {
-        this.onlineResourceName = onlineResourceName;
     }
 
     public String getOnlineResourceDescription() {
         return onlineResourceDescription;
     }
 
+    @Override
     public void setOnlineResourceDescription(String onlineResourceDescription) {
         this.onlineResourceDescription = onlineResourceDescription;
+    }
+
+    @Override
+    public String getOnlineResourceDescriptiveName() {
+        return onlineResourceDescriptiveName;
+    }
+
+    @Override
+    public void setOnlineResourceDescriptiveName(String onlineResourceDescriptiveName) {
+        this.onlineResourceDescriptiveName = onlineResourceDescriptiveName;
     }
 
     @Override
@@ -116,13 +132,25 @@ public class DistributionResource implements IDistributionResource {
             return false;
         }
         DistributionResource other = (DistributionResource) object;
-        return this.getOnlineResourceUrl().equals(other.getOnlineResourceUrl());
+        return this.getOnlineResourceUrl().equals(other.getOnlineResourceUrl()) && this.getOnlineResourceProtocol().equals(other.getOnlineResourceProtocol());
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.onlineResourceUrl);
+        int hash = 5;
+        hash = 37 * hash + Objects.hashCode(this.onlineResourceUrl);
+        hash = 37 * hash + Objects.hashCode(this.onlineResourceProtocol);
         return hash;
     }
+
+    @Override
+    public String getOnlineResourceIdentifier() {
+        return onlineResourceIdentifier;
+    }
+
+    @Override
+    public void setOnlineResourceIdentifier(String onlineResourceIdentifier) {
+        this.onlineResourceIdentifier = onlineResourceIdentifier;
+    }
+
 }
