@@ -29,6 +29,7 @@ public class Datasource implements IDatasource {
     List<IParameter> parameters;
     List<IPlatform> platforms;
     List<IRegion> regions;
+    private String bibliographicReference;
 
     public String getTitle() {
         return title;
@@ -112,7 +113,7 @@ public class Datasource implements IDatasource {
         this.platforms = platforms;
     }
 
-    public Datasource(String title, String subtitle, String identifier, Date publicationDate, String authorList, List<IInstituteRole> parties, Set<String> languages, List<IProject> projects, List<IParameter> paramaters, List<IPlatform> platforms, List<IRegion> regions) {
+    public Datasource(String title, String subtitle, String identifier, Date publicationDate, String authorList, List<IInstituteRole> parties, Set<String> languages, List<IProject> projects, List<IParameter> paramaters, List<IPlatform> platforms, List<IRegion> regions, String bibliographicReference) {
         this.title = title;
         this.subtitle = subtitle;
         this.identifier = identifier;
@@ -124,6 +125,7 @@ public class Datasource implements IDatasource {
         this.parameters = paramaters;
         this.platforms = platforms;
         this.regions = regions;
+        this.bibliographicReference = bibliographicReference;
     }
 
     @Override
@@ -141,5 +143,15 @@ public class Datasource implements IDatasource {
         return regions;
     }
 
+    @Override
+    public String getBibliographicReference() {
+        return this.bibliographicReference;
+    }
+
+    @Override
+    public void setBibliographicReference(String reference) {
+        this.bibliographicReference = bibliographicReference;
+
+    }
 
 }

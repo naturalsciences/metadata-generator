@@ -5,11 +5,15 @@
  */
 package be.naturalsciences.bmdc.metadata.model;
 
+import java.io.Serializable;
+
 /**
  *
  * @author thomas
  */
-public interface IInstituteRole {
+public interface IInstituteRole extends Serializable {
+
+    static final long serialVersionUID = 1L;
 
     public IDataset.Role getIsoRole();
 

@@ -6,6 +6,7 @@
 package be.naturalsciences.bmdc.iso;
 
 import be.naturalsciences.bmdc.metadata.atom.AtomFeedDatasetBuilder;
+import be.naturalsciences.bmdc.metadata.iso.ISO19115DatasetPrinterTest;
 import be.naturalsciences.bmdc.metadata.model.IDataset;
 import be.naturalsciences.bmdc.metadata.model.impl.Dataset;
 import be.naturalsciences.bmdc.metadata.model.impl.InstituteRole;
@@ -47,9 +48,9 @@ public class AtomFeedCreatorTest {
     @Test
     public void testCreateAtom() throws Exception {
         System.out.println("createAtom");
-        Dataset dataset = MetadataBuilderTest.createFakeDataset1();
+        Dataset dataset = ISO19115DatasetPrinterTest.createFakeDataset1();
         AtomFeedDatasetBuilder instance = new AtomFeedDatasetBuilder(dataset, "http://astacus.bmdc.be:8080/datasets/atom/service.xml", "http://metadata.naturalsciences.be/" + dataset.getIdentifier(), "http://astacus.bmdc.be:8080/datasets/atom/" + dataset.getIdentifier());
-        InstituteRole BMDC_AUTHOR = new InstituteRole(IDataset.Role.AUTHOR, "BMDC", "02/773.21.44", null, "Gulledelle 100", "Sint-Lambrechts-Woluwe", "1200", "BE", "bmdc@naturalsciences.be", "http://bmdc.naturalsciences.be");
+        InstituteRole BMDC_AUTHOR = new InstituteRole(IDataset.Role.AUTHOR, "BMDC", "02/773.21.44", null, "Vautierstraat 29", "Brussels", "1000", "BE", "bmdc@naturalsciences.be", "http://www.bmdc.be");
 
         String result = instance.createXMLString(BMDC_AUTHOR);
         System.out.println(result);

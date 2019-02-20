@@ -5,14 +5,17 @@
  */
 package be.naturalsciences.bmdc.metadata.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author thomas
  */
-public interface IKeyword {
-
+public interface IKeyword extends Serializable {
+    
+    static final long serialVersionUID = 1L;
+    
     public enum KeywordType {
         DISCIPLINE,
         PLACE,
