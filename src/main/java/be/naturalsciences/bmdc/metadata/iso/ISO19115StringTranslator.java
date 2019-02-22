@@ -5,16 +5,22 @@
  */
 package be.naturalsciences.bmdc.metadata.iso;
 
-import static be.naturalsciences.bmdc.metadata.iso.ISO19115DatasetPrinter.MD_NAMESPACES;
 import be.naturalsciences.bmdc.utils.LocalizedString;
 import be.naturalsciences.bmdc.utils.xml.XMLElement;
 import be.naturalsciences.bmdc.utils.xml.XMLUtils;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 /**
  * A class to translate parts (regex matches) of an stringBuilder String
@@ -23,163 +29,135 @@ import java.util.stream.Collectors;
  */
 public class ISO19115StringTranslator {
 
-    private StringBuilder stringBuilder;
+    //private StringBuilder stringBuilder;
 
-    private final Set<String> translatedLanguages = new HashSet<>();
-
-    public StringBuilder getStringBuilder() {
+    /*public StringBuilder getStringBuilder() {
         return stringBuilder;
     }
 
     void setStringBuilder(StringBuilder stringBuilder) {
         this.stringBuilder = stringBuilder;
+    }*/
+    private Document document;
+
+    private Set<String> translatedLanguages;
+
+    public ISO19115StringTranslator() {
+
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public final void setDocument(Document document) {
+        this.document = document;
+        translatedLanguages = new HashSet<>(); //start the translated languages anew
     }
 
     public Set<String> getTranslatedLanguages() {
         return translatedLanguages;
     }
 
+    public StringBuilder translate(StringBuilder sb, Map<String, Set<LocalizedString>> translations) {
+        try {
+            setDocument(XMLUtils.toDocument(sb.toString()));
+
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SAXException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (JAXBException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        translate(translations);
+
+        StringBuilder stringBuilder = new StringBuilder(XMLUtils.toXML(getDocument()));
+        return stringBuilder;
+    }
+
+    public StringBuilder translate(StringBuilder sb, XMLElement element, Set<LocalizedString> translations) {
+        try {
+            setDocument(XMLUtils.toDocument(sb.toString()));
+
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SAXException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (JAXBException ex) {
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        translate(element, translations);
+        return new StringBuilder(XMLUtils.toXML(getDocument()));
+    }
+
     /**
      * *
-     * Translate each occurence of patternToTranslate with the provided set of
-     * languages and translations.
+     * Translate each occurrence of map key with the map value which. The map
+     * value is a set of languages and translations.
      *
-     * @param XMLText The XML String that needs some elements translated
+     * @param XMLText The XML String (whole string) that needs some elements
+     * translated
      * @param patternToTranslate A pattern completely identifying an element to
      * be translated be translated (no wildcards and with ONE capturing group)
      * @param translations A set of translations for each language
      * @return
      */
-    public void processTranslations(Map<String, Set<LocalizedString>> translationString) {
+    private void translate(Map<String, Set<LocalizedString>> translationString) {
         if (translationString != null) {
             for (Map.Entry<String, Set<LocalizedString>> entry : translationString.entrySet()) {
-                /*String searchFor = entry.getKey();
-                if (searchFor.startsWith("(") && searchFor.endsWith(")")) {
-                    searchFor = searchFor.substring(1).substring(0, searchFor.length() - 1);
-                }
-                searchFor = "(" + Pattern.quote(searchFor) + ")";
-
-                Set<LocalizedString> value = entry.getValue();
-                processTranslations(Pattern.compile(searchFor), value);*/
                 String searchFor = entry.getKey();
                 Set<LocalizedString> translations = entry.getValue();
                 XMLElement element = new XMLElement("gco:CharacterString", searchFor, null, null);
-                processTranslations2(element, translations);
+                translate(element, translations);
                 element = new XMLElement("gmx:Anchor", searchFor, null, null);
-                processTranslations2(element, translations);
+                translate(element, translations);
             }
         }
     }
 
-    /**
-     * *
-     * Translate each occurence of patternToTranslate with the provided set of
-     * languages and translations.
-     *
-     * @param toBeTranslated The stringBuilder String that needs some elements
-     * translated
-     * @param patternToTranslate A pattern completely identifying an element to
-     * be translated be translated (no wildcards and with ONE capturing group)
-     * @param translations A set of translations for each language
-     * @return The stringBuilder string with all strings translated.
-     */
-    /*private void processTranslations(Pattern patternToTranslate, Set<LocalizedString> translations) {
-        if (translations != null) {
-            if (patternToTranslate != null && translations != null && !translations.isEmpty()) {
-                Map<String, String> translationsMap = new HashMap<>();
-                translationsMap = translations.stream().filter(t -> t.getUnderlyingString() != null && t.getLanguageString() != null).collect(Collectors.toMap(t -> t.getLanguageString().toUpperCase(), t -> t.getUnderlyingString()));
-                processTranslations(patternToTranslate, translationsMap);
+    private void translate(XMLElement element, Set<LocalizedString> translations) {
+        if (element != null && translations != null && !translations.isEmpty()) {
+            // Map<String, String> translationsMap = new HashMap<>();
+            // translationsMap = translations.stream().filter(t -> t.getUnderlyingString() != null && t.getLanguageString() != null).collect(Collectors.toMap(t -> t.getLanguageString().toUpperCase(), t -> t.getUnderlyingString()));
+            try {
+                StringBuilder freeTextBuilder = new StringBuilder("<gmd:PT_FreeText xmlns:gmd=\"http://www.isotc211.org/2005/gmd\">"); //the namespace is needed!
+                for (LocalizedString localizedString : translations) {
+                    String language = localizedString.getLanguageString().toUpperCase();
+                    String translation = localizedString.getUnderlyingString();
+                    if (translation != null) {
+                        translatedLanguages.add(language);
+                        freeTextBuilder.append("<gmd:textGroup><gmd:LocalisedCharacterString locale=\"#").append(language).append("\">").append(translation).append("</gmd:LocalisedCharacterString></gmd:textGroup>");
+                    }
+                }
+                /*for (String language : translations.keySet()) {
+                    language = language.toUpperCase();
+                    String translation = translations.get(language);
+                    if (translation != null) {
+                        translatedLanguages.add(language);
+                        freeTextBuilder.append("<gmd:textGroup><gmd:LocalisedCharacterString locale=\"#").append(language).append("\">").append(translation).append("</gmd:LocalisedCharacterString></gmd:textGroup>");
+                    }
+                }*/
+                freeTextBuilder.append("</gmd:PT_FreeText>");
+
+                XMLUtils.pasteAfter(document, element.toXPath(), freeTextBuilder.toString(), ISO19115DatasetPrinter.MD_NAMESPACES);
+
+                // <gmd:country xmlns:ns0="xsi:type" ns0:xsi="gmd:PT_FreeText_PropertyType">
+                XMLUtils.appendAttribute(document, element.toXPath() + "/parent::*", "xsi", "type", "gmd:PT_FreeText_PropertyType", ISO19115DatasetPrinter.MD_NAMESPACES);
+            } catch (Exception ex) {
+                Logger.getLogger(ISO19115StringTranslator.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+
+    }
+
+    /*private void translate(XMLElement element, Map<String, String> translations) {
+        if (translations != null && !translations.isEmpty()) {
+
         }
     }*/
-    /**
-     * *
-     *
-     * @param toBeTranslated The stringBuilder String that needs some elements
-     * translated
-     * @param patternToTranslate A pattern completely identifying an element to
-     * be translated
-     * @param translations A Map of String, String elements containing a set
-     * language, translations searchFor-value pairs
-     * @return The stringBuilder string with all strings translated.
-     */
-    /*private void processTranslations(Pattern patternToTranslate, Map<String, String> translations) {
-        if (translations != null && !translations.isEmpty()) {
-            StringBuilder freeTextBuilder = new StringBuilder("<gmd:PT_FreeText>");
-
-            for (String language : translations.keySet()) {
-                language = language.toUpperCase();
-                String translation = translations.get(language);
-                if (translation != null) {
-                    translatedLanguages.add(language);
-                    freeTextBuilder.append("<gmd:textGroup><gmd:LocalisedCharacterString locale=\"#").append(language).append("\">").append(translation).append("</gmd:LocalisedCharacterString></gmd:textGroup>");
-                }
-            }
-            freeTextBuilder.append("</gmd:PT_FreeText>");
-
-//            XMLUtils.appendAttribute(stringBuilder, "//gco:CharacterString[text()='Pierre-Yves Declercq']", "xsi:type", "gmd:PT_FreeText_PropertyType", ISO19115DatasetPrinter.MD_NAMESPACES);
-            stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, patternToTranslate, "$1" + freeTextBuilder.toString());
-            //stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, "<(.*?)>\\n*[\\t| ]*" + patternToTranslate, "<$1 xsi:type=\"gmd:PT_FreeText_PropertyType\">$2");
-            Pattern from = Pattern.compile("<(.*?)><.*?>" + patternToTranslate);
-            stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, from, "<$1 xsi:type=\"gmd:PT_FreeText_PropertyType\"><gco:CharacterString>$2$3");
-            //  stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, "<(.*?)>(<gmx:Anchor.*?>)" + patternToTranslate, "<$1 xsi:type=\"gmd:PT_FreeText_PropertyType\">$2$3");
-            System.out.println(stringBuilder);
-        }
-    }*/
-    /**
-     * *
-     * Translate each occurence of patternToTranslate with the provided set of
-     * languages and translations.
-     *
-     * @param XMLText The XML String that needs some elements translated
-     * @param patternToTranslate A pattern completely identifying an element to
-     * be translated be translated (no wildcards and with ONE capturing group)
-     * @param translations A set of translations for each language
-     * @return
-     */
-    public void processTranslations2(Map<XMLElement, Set<LocalizedString>> translationMap) {
-        if (translationMap != null) {
-            for (Map.Entry<XMLElement, Set<LocalizedString>> entry : translationMap.entrySet()) {
-                XMLElement searchFor = entry.getKey();
-                Set<LocalizedString> translations = entry.getValue();
-                processTranslations2(searchFor, translations);
-            }
-        }
-    }
-
-    public void processTranslations2(XMLElement element, Set<LocalizedString> translations) {
-        if (translations != null) {
-            if (element != null && translations != null && !translations.isEmpty()) {
-                Map<String, String> translationsMap = new HashMap<>();
-                translationsMap = translations.stream().filter(t -> t.getUnderlyingString() != null && t.getLanguageString() != null).collect(Collectors.toMap(t -> t.getLanguageString().toUpperCase(), t -> t.getUnderlyingString()));
-                processTranslations2(element, translationsMap);
-            }
-        }
-    }
-
-    private void processTranslations2(XMLElement element, Map<String, String> translations) {
-        if (translations != null && !translations.isEmpty()) {
-            StringBuilder freeTextBuilder = new StringBuilder("<gmd:PT_FreeText xmlns:gmd=\"http://www.isotc211.org/2005/gmd\">"); //the namespace is needed!
-
-            for (String language : translations.keySet()) {
-                language = language.toUpperCase();
-                String translation = translations.get(language);
-                if (translation != null) {
-                    translatedLanguages.add(language);
-                    freeTextBuilder.append("<gmd:textGroup><gmd:LocalisedCharacterString locale=\"#").append(language).append("\">").append(translation).append("</gmd:LocalisedCharacterString></gmd:textGroup>");
-                }
-            }
-            freeTextBuilder.append("</gmd:PT_FreeText>");
-
-            XMLUtils.pasteAfter(stringBuilder, element.toXPath(), freeTextBuilder.toString(), ISO19115DatasetPrinter.MD_NAMESPACES);
-            XMLUtils.appendAttribute(stringBuilder, element.toXPath() + "/parent::*", "http://www.w3.org/2001/XMLSchema-instance", "xsi:type", "gmd:PT_FreeText_PropertyType", ISO19115DatasetPrinter.MD_NAMESPACES);
-
-            // stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, patternToTranslate, "$1" + freeTextBuilder.toString());
-            //stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, "<(.*?)>\\n*[\\t| ]*" + patternToTranslate, "<$1 xsi:type=\"gmd:PT_FreeText_PropertyType\">$2");
-            //  Pattern from = Pattern.compile("<(.*?)><.*?>" + patternToTranslate);
-            // stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, from, "<$1 xsi:type=\"gmd:PT_FreeText_PropertyType\"><gco:CharacterString>$2$3");
-            //  stringBuilder = StringUtils.stringBuilderReplaceAll(stringBuilder, "<(.*?)>(<gmx:Anchor.*?>)" + patternToTranslate, "<$1 xsi:type=\"gmd:PT_FreeText_PropertyType\">$2$3");
-            // System.out.println(stringBuilder);
-        }
-    }
 }
