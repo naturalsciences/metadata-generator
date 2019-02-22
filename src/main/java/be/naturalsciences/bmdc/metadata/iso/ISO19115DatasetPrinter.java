@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
@@ -33,11 +35,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.bind.JAXBException;
-import javax.xml.transform.TransformerException;
-import nu.xom.ParsingException;
 import org.apache.sis.metadata.iso.DefaultMetadata;
 import org.apache.sis.xml.XML;
 
@@ -49,7 +48,8 @@ import org.apache.sis.xml.XML;
  */
 public class ISO19115DatasetPrinter implements Serializable {
 
-    private DefaultMetadata metadata;
+    //private DefaultMetadata metadata;
+    //private Document document;
     private IDataset dataset;
     private StringBuilder sb;
     private Set<String> keywordLanguages;
@@ -66,10 +66,9 @@ public class ISO19115DatasetPrinter implements Serializable {
     private static Map<String, File> INSPIRE_VOCABULARY = new HashMap();
 
     public static final Map<String, String> CSW_NAMESPACES = new HashMap<>();
-
     public static final Map<String, String> GML_NAMESPACES = new HashMap<>();
-
     public static final Map<String, String> MD_NAMESPACES = new HashMap<>();
+    public static final Map<String, String> RDF_NAMESPACES = new HashMap<>();
 
     static {
         String tmp = System.getProperty("java.io.tmpdir");
@@ -135,6 +134,12 @@ public class ISO19115DatasetPrinter implements Serializable {
         MD_NAMESPACES.put("geonet", "http://www.fao.org/geonetwork");
         MD_NAMESPACES.put("gmx", "http://www.isotc211.org/2005/gmx");
 
+        RDF_NAMESPACES.put("dc", "http://purl.org/dc/elements/1.1/");
+        RDF_NAMESPACES.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        RDF_NAMESPACES.put("dct", "http://purl.org/dc/terms/");
+        RDF_NAMESPACES.put("dcterms", "http://purl.org/dc/terms/");
+        RDF_NAMESPACES.put("skos", "http://www.w3.org/2004/02/skos/core#");
+
     }
 
     public String getResult() {
@@ -170,23 +175,33 @@ public class ISO19115DatasetPrinter implements Serializable {
         }
         URL themeRdfUrl = null;
 
-        try {
-            for (String keywordLanguage : getKeywordLanguages()) {
-                if (INSPIRE_VOCABULARY.get(keywordLanguage) == null) { //if it's not yet downloaded
-                    String fileName = "theme." + keywordLanguage.toLowerCase() + ".rdf";
+        for (String keywordLanguage : getKeywordLanguages()) {
+            if (INSPIRE_VOCABULARY.get(keywordLanguage) == null) { //if it's not yet downloaded
+                String fileName = "theme." + keywordLanguage.toLowerCase() + ".rdf";
+                try {
                     themeRdfUrl = new URL("http://inspire.ec.europa.eu/theme/" + fileName);
-                    File file = new File(INSPIRE_RDF_DIR, fileName);
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex); //won't happen
+                }
+                File file = new File(INSPIRE_RDF_DIR, fileName);
+                try {
+
                     FileUtils.copyURLToFile(themeRdfUrl, file, CONNECTION_TIME_OUT, READ_TIME_OUT);
                     Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Downloaded " + themeRdfUrl + ".");
                     INSPIRE_VOCABULARY.put(keywordLanguage, file);
+                } catch (IOException ex) {//i.e. the theme file couldn't be downloaded
+                    Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.SEVERE, "An exception occured while trying to download " + themeRdfUrl + ".", ex);
+                    if (file.isFile()) { //if it's there already and it's a file
+                        INSPIRE_VOCABULARY.put(keywordLanguage, file);
+                    }
                 }
             }
-        } catch (Exception ex) {
-            Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.SEVERE, "An exception occured while trying to download " + themeRdfUrl + ".", ex);
         }
-        this.metadata = metadata;
+
+        //this.metadata = metadata;
         this.dataset = dataset;
-        this.sb = new StringBuilder(XML.marshal(metadata));
+        String xml = XML.marshal(metadata);
+        this.sb = new StringBuilder(xml);
         this.translator = new ISO19115StringTranslator();
         this.extraTranslations = extraTranslations;
 
@@ -274,66 +289,53 @@ public class ISO19115DatasetPrinter implements Serializable {
             List<String> urlMatches2 = StringUtils.flattenListOfLists(urlMatches);
             Set<String> urlMatches3 = new HashSet(urlMatches2);
             if (!urlMatches3.isEmpty()) {
-                Map<String, String> namespaces = new HashMap<>();
-                namespaces.put("dc", "http://purl.org/dc/elements/1.1/");
-                namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-                namespaces.put("dct", "http://purl.org/dc/terms/");
-                namespaces.put("dcterms", "http://purl.org/dc/terms/");
-                namespaces.put("skos", "http://www.w3.org/2004/02/skos/core#");
-
                 for (String urlMatch : urlMatches3) {
-                    if (urlMatch.contains("gemet/concept/")) { //instead of looking in the whole file, just look in the fragments of it that matter.
-                        File gemetThemeFile = new File(INSPIRE_RDF_DIR, "gemet.rdf");
-                        if (!rdfMatchResults.containsKey(urlMatch)) {
-                            String xmlForResult = null;
-                            try {
-                                xmlForResult = XMLUtils.xpathQueryReturningXML(gemetThemeFile, "/rdf:RDF/rdf:Description[@rdf:about='" + urlMatch.replace("http://www.eionet.europa.eu/gemet/", "").replaceAll("/$", "") + "']", namespaces);
-                            } catch (ParsingException ex) {
-                                Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, "An exception occured. " + urlMatch + " could not be found.", ex);
-                            } catch (IOException ex) {
-                                Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, "An exception occured. " + urlMatch + " could not be found.", ex);
-                            }
-                            if (xmlForResult != null) {
-                                rdfMatchResults.put(urlMatch, xmlForResult);
-                            }
-                        }
-                    }
-                    if (ANCHOR_TRANSLATIONS_MAP.get(urlMatch) == null || ANCHOR_TRANSLATIONS_MAP.get(urlMatch).isEmpty()) {
-                        for (String language : getKeywordLanguages()) {
-                            if (urlMatch.contains("inspire.ec.europa.eu/theme/")) {//INSPIRE Themes
-                                //  File gemetInspireFile = new File(INSPIRE_RDF_DIR, "theme." + language.toLowerCase() + ".rdf");
-                                File gemetInspireFile = INSPIRE_VOCABULARY.get(language);
-                                try {
-                                    List<String> translations = XMLUtils.xpathQuery(gemetInspireFile, "/rdf:RDF/rdf:Description[@rdf:about='" + urlMatch + "']/dct:title/text()", namespaces);
-                                    if (translations != null && !translations.isEmpty()) {
-                                        Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Translating " + urlMatch + " to " + language);
-                                        CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch, new LocalizedString(translations.get(0), LANGUAGES.get(language).get(0)));
-                                        //translationsMap.put(language, translations.get(0));
-                                    }
-                                } catch (Exception ex) {
-                                    Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.SEVERE, "An exception occured. " + urlMatch + " has not been translated.", ex);
-                                }
-                            } else if (urlMatch.contains("gemet/concept/")) {//GEMET themes
-                                try {
-                                    String xPath = "/rdf:RDF/rdf:Description/skos:prefLabel[@xml:lang='" + language.toLowerCase() + "']/text()";
-                                    List<String> translations = XMLUtils.xpathQuery(rdfMatchResults.get(urlMatch), xPath, namespaces);
-                                    if (translations != null && !translations.isEmpty()) {
-                                        Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Translating " + urlMatch + " to " + language);
-                                        CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch, new LocalizedString(translations.get(0), LANGUAGES.get(language).get(0)));
-                                        //translationsMap.put(language, translations.get(0));
-                                    }
-                                } catch (Exception ex) {
-                                    Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.SEVERE, "An exception occured. " + urlMatch + " has not been translated.", ex);
+                    try {
+                        if (urlMatch.contains("gemet/concept/")) { //instead of looking in the whole file, just look in the fragments of it that matter.
+                            File gemetThemeFile = new File(INSPIRE_RDF_DIR, "gemet.rdf");
+                            if (!rdfMatchResults.containsKey(urlMatch)) {
+                                String xmlForResult = XMLUtils.xpathQueryNodeXML(gemetThemeFile, "/rdf:RDF/rdf:Description[@rdf:about='" + urlMatch.replace("http://www.eionet.europa.eu/gemet/", "").replaceAll("/$", "") + "']", RDF_NAMESPACES);
+                                if (xmlForResult != null) {
+                                    rdfMatchResults.put(urlMatch, xmlForResult);
                                 }
                             }
                         }
-                    }
+                        if (ANCHOR_TRANSLATIONS_MAP.get(urlMatch) == null || ANCHOR_TRANSLATIONS_MAP.get(urlMatch).isEmpty()) {
+                            for (String language : getKeywordLanguages()) {
+                                if (urlMatch.contains("inspire.ec.europa.eu/theme/")) {//INSPIRE Themes
+                                    File gemetInspireFile = INSPIRE_VOCABULARY.get(language);
+                                    List<String> translations = XMLUtils.xpathQueryString(gemetInspireFile, "/rdf:RDF/rdf:Description[@rdf:about='" + urlMatch + "']/dct:title/text()", RDF_NAMESPACES);
+                                    if (translations != null && !translations.isEmpty()) {
+                                        Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Translating " + urlMatch + " to " + language);
+                                        CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch, new LocalizedString(translations.get(0), LANGUAGES.get(language).get(0)));
+                                    }
 
+                                } else if (urlMatch.contains("gemet/concept/")) {//GEMET themes
+                                    String xPath = "/rdf:RDF/rdf:Description/skos:prefLabel[@xml:lang='" + language.toLowerCase() + "']/text()";
+                                    List<String> translations = XMLUtils.xpathQueryString(rdfMatchResults.get(urlMatch), xPath, RDF_NAMESPACES);
+                                    if (translations != null && !translations.isEmpty()) {
+                                        Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Translating " + urlMatch + " to " + language);
+                                        CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch, new LocalizedString(translations.get(0), LANGUAGES.get(language).get(0)));
+                                    }
+
+                                }
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, "An exception occured. " + urlMatch + " could not be found.", ex);
+                    }
                     if (ANCHOR_TRANSLATIONS_MAP.get(urlMatch) != null && !ANCHOR_TRANSLATIONS_MAP.get(urlMatch).isEmpty()) {
                         // Pattern patternToTranslate = Pattern.compile("(<gmx:Anchor xlink:href=\"" + urlMatch + "\">.*?<\\/gmx:Anchor>)");
+
+                        sb = translator.translate(sb, new XMLElement("gmx:Anchor", null, "xlink:href", urlMatch), ANCHOR_TRANSLATIONS_MAP.get(urlMatch));
+
+                        /* translator.setDocument(document);
+                        translator.translate(new XMLElement("gmx:Anchor", null, "xlink:href", urlMatch), ANCHOR_TRANSLATIONS_MAP.get(urlMatch));
+                        document = translator.getDocument();*/
+ /*
                         translator.setStringBuilder(sb);
-                        translator.processTranslations2(new XMLElement("gmx:Anchor", null, "xlink:href", urlMatch), ANCHOR_TRANSLATIONS_MAP.get(urlMatch));
-                        sb = translator.getStringBuilder();
+                        translator.translate(new XMLElement("gmx:Anchor", null, "xlink:href", urlMatch), ANCHOR_TRANSLATIONS_MAP.get(urlMatch));
+                        sb = translator.getStringBuilder();*/
                     }
                 }
             }
@@ -399,20 +401,18 @@ public class ISO19115DatasetPrinter implements Serializable {
         replaceAll(pattern2, "<gmx:Anchor xlink:href=\"$1\">$2</gmx:Anchor>");
         processAnchorTranslations();
 
-        translator.setStringBuilder(sb);
-        translator.processTranslations(extraTranslations);
-        sb = translator.getStringBuilder();
+        sb = translator.translate(sb, extraTranslations);
 
         if (!translator.getTranslatedLanguages().isEmpty()) {
             for (String translatedLanguage : translator.getTranslatedLanguages()) {
                 replaceAll("(</gmd:metadataStandardVersion>)", "$1" + LOCALE_MAP.get(translatedLanguage));
             }
         }
-        try {
-            sb = new StringBuilder(XMLUtils.prettyPrint(sb.toString()));
+        /* try {
+            sb = new StringBuilder(XMLUtilsOld.prettyPrint(sb.toString()));
         } catch (TransformerException ex) {
             Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
 
     /**
@@ -433,7 +433,8 @@ public class ISO19115DatasetPrinter implements Serializable {
     /**
      * *
      * Verify whether two ISO 19115:2004 xml documents equal each other,
-     * ignoring the creation dates and different values for gml:ids
+     * ignoring the cregmd:deliveryPointation dates and different values for
+     * gml:ids
      *
      * @param xml1
      * @param xml2
