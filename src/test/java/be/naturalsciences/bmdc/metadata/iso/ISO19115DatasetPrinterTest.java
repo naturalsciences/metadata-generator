@@ -321,16 +321,19 @@ public class ISO19115DatasetPrinterTest {
 
         assertFalse(Pattern.compile("</gmx:Anchor>\n?</gco:CharacterString>").matcher(xml).find());
         assertFalse(xml.contains("Geographic Information — Metadata Part 1: Fundamentals"));  //"Geographic Information — Metadata Part 1: Fundamentals"
+        assertTrue(xml.contains("Geographic information -- Metadata"));
         assertTrue(xml.contains("<gco:Decimal>50.0</gco:Decimal>"));
         assertTrue(xml.contains("<gco:Decimal>52.0</gco:Decimal>"));
         assertTrue(xml.contains("<gco:Decimal>2.0</gco:Decimal>"));
         assertTrue(xml.contains("<gco:Decimal>3.0</gco:Decimal>"));
-        assertTrue(xml.contains("<gmd:deliveryPoint xsi:type=\"gmd:PT_FreeText_PropertyType\">"));
-        
+
+        assertTrue(xml.contains("Koninklijk Belgisch Instituut voor Natuurwetenschappen, Operationele Directie Natuurlijk Milieu, Belgian Marine Data Centre (BMDC)"));
+
         assertTrue(xml.contains("<gmd:LocalisedCharacterString locale=\"#EN\">Royal Belgian Institute for Natural Sciences,"));
         assertTrue(xml.contains("<gmd:LocalisedCharacterString locale=\"#FR\">Rue Vautier 29"));
         assertTrue(xml.contains("<gmd:LocalisedCharacterString locale=\"#NL\">Vautierstraat 29"));
-        assertTrue(xml.contains("Koninklijk Belgisch Instituut voor Natuurwetenschappen, Operationele Directie Natuurlijk Milieu, Belgian Marine Data Centre (BMDC)"));
+
+        assertTrue(xml.contains("<gmd:deliveryPoint xsi:type=\"gmd:PT_FreeText_PropertyType\">"));
 
         assertTrue(xml.contains("<gmd:PT_Locale id=\"NL\">"));
         assertTrue(xml.contains("<gmd:PT_Locale id=\"FR\">"));
