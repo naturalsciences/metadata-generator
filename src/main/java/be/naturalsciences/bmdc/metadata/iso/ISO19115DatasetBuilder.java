@@ -6,7 +6,6 @@
 package be.naturalsciences.bmdc.metadata.iso;
 
 import be.naturalsciences.bmdc.metadata.model.comparator.GeographicDescriptionComparator;
-import be.naturalsciences.bmdc.metadata.model.FormatEnum;
 import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
 import be.naturalsciences.bmdc.metadata.model.IDataset;
 import be.naturalsciences.bmdc.metadata.model.IRegion;
@@ -15,58 +14,33 @@ import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IDatasource;
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
-import be.naturalsciences.bmdc.utils.LocalizedString;
 import be.naturalsciences.bmdc.metadata.model.comparator.DatasourceComparator;
-import be.naturalsciences.bmdc.utils.FileUtils;
-import be.naturalsciences.bmdc.utils.StringUtils;
-import be.naturalsciences.bmdc.utils.xml.XMLUtils;
 import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import static java.util.Collections.singleton;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import org.apache.sis.internal.jaxb.gmx.Anchor;
 import org.apache.sis.internal.jaxb.metadata.replace.ReferenceSystemMetadata;
 import org.apache.sis.metadata.iso.DefaultIdentifier;
@@ -101,7 +75,6 @@ import org.apache.sis.metadata.iso.quality.DefaultDomainConsistency;
 import org.apache.sis.metadata.iso.quality.DefaultScope;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.apache.sis.xml.NilReason;
-import org.apache.sis.xml.XML;
 import org.opengis.metadata.Identifier;
 import org.opengis.metadata.citation.CitationDate;
 import org.opengis.metadata.citation.DateType;
@@ -118,7 +91,6 @@ import org.opengis.metadata.distribution.Format;
 import org.opengis.metadata.extent.GeographicDescription;
 import org.opengis.metadata.extent.GeographicExtent;
 import org.opengis.metadata.identification.AssociationType;
-import org.opengis.metadata.identification.Identification;
 import org.opengis.metadata.identification.InitiativeType;
 import org.opengis.metadata.identification.KeywordType;
 import org.opengis.metadata.identification.Keywords;
@@ -129,10 +101,6 @@ import org.opengis.metadata.quality.Scope;
 import org.opengis.metadata.spatial.SpatialRepresentationType;
 //import org.opengis.temporal.Period;
 import org.opengis.util.InternationalString;
-import org.rauschig.jarchivelib.Archiver;
-import org.rauschig.jarchivelib.ArchiverFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * A class responsible to create a complete ISO 19115:2003/19139 Metadata
@@ -1248,15 +1216,13 @@ public class ISO19115DatasetBuilder {
     }
 
     private Set<Format> buildDumbFormat(Collection<IDistributionResource> distributionResources) {
-        Set<IDistributionFormat> formats = distributionResources.stream().map(dr -> dr.getDistributionFormats()).flatMap(l -> l.stream()).collect(Collectors.toSet());
+        Set<IDistributionFormat> formats = distributionResources.stream().map(dr -> dr.getDistributionFormats()).flatMap(l -> l.stream()).collect(Collectors.toCollection(LinkedHashSet::new)); //maintain insertion order
         return buildFormat(formats);
     }
 
     private Set<Format> buildFormat(Set<IDistributionFormat> distributionFormats) {
-        Set<Format> formats = new HashSet<>();
+        Set<Format> formats = new LinkedHashSet<>(); //maintain insertion order
         for (IDistributionFormat distributionFormat : distributionFormats) {
-
-            //if (distributionFormat.getDistributionFormatNiceName() != null) {
             DefaultFormat format = new DefaultFormat();
 
             if (useAnchor && distributionFormat.getDistributionFormatUrn() != null) {
@@ -1292,9 +1258,7 @@ public class ISO19115DatasetBuilder {
                     Double dataSizeInBytes = distributionResource.getDataSizeInMB();
                     DefaultDigitalTransferOptions digiTrans = new DefaultDigitalTransferOptions();
                     if (dataSizeInBytes != null && !dataSizeInBytes.isNaN() && !dataSizeInBytes.isInfinite() && dataSizeInBytes > 0) {
-
                         digiTrans.setTransferSize(distributionResource.getDataSizeInMB());
-
                     }
                     distributor.setDistributorTransferOptions(singleton(digiTrans));
 
@@ -1453,8 +1417,7 @@ public class ISO19115DatasetBuilder {
         return dataset.getFileName();
     }
 
-    //  <gmd:spatialRepresentationInfo><gmd:MD_VectorSpatialRepresentation><gmd:topologyLevel><gmd:MD_TopologyLevelCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/ML_gmxCodelists.xml#MD_TopologyLevelCode" codeListValue="geometryOnly"/></gmd:topologyLevel></gmd:MD_VectorSpatialRepresentation></gmd:spatialRepresentationInfo>
-    /**
+     /**
      * *
      * Construct the ISO 19115 metadata content of the Dataset provided in the
      * constructor, or return the already constructed metadata if done so.
