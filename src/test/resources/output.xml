@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datacite:resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:datacite="http://datacite.org/schema/kernel-4"
+                   xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.1/metadata.xsd">
+   <datacite:identifier identifierType="DOI">10.5072/e2aaecaf-b555-405e-ae77-dfe1b07e0f17</datacite:identifier>
+   <datacite:resourceType resourceTypeGeneral="Dataset">dataset/Dataset</datacite:resourceType>
+   <datacite:titles>
+      <datacite:title xml:lang="eng">Management zones with regards to fisheries in the Belgian Part of the North Sea</datacite:title>
+      <datacite:title xml:lang="fre">Zones de gestion concernant la pêche en mer dans la partie belge du mer du Nord</datacite:title>
+      <datacite:title xml:lang="dut">Management zones aangaande zeevisserij in het Belgisch deel van de Noordzee</datacite:title>
+      <datacite:title xml:lang="ger">Bewirtschaftungszonen in Bezug auf die Fischerei im belgischen Teil der Nordsee</datacite:title>
+   </datacite:titles>
+   <datacite:dates>
+      <datacite:date dateType="Created">2014-03-28</datacite:date>
+   </datacite:dates>
+   <datacite:publicationYear>2014</datacite:publicationYear>
+   <datacite:descriptions>
+      <datacite:description xml:lang="eng" descriptionType="Abstract">
+          The Royal Decree of 20 March 2014 establishing a marine spatial plan defines in its Art. 6, six fisheries management areas: Regular regime, Art. 6 § 1; Fisheries management area 1, Art. 6 § 1.1°; Fisheries management area 2, Art. 6 § 1.2°; Fisheries management area 3, Art. 6 § 1.3°; Fisheries management area 4, Art. 6 § 1.4°; Fisheries management area 5, Art. 6 § 3. These zones are made available digitally in the resource described by this metadata document.
+          
+          Please refer to the Belgian official gazette ("Moniteur belge/Belgisch Staatsblad") for official reference information.
+        </datacite:description>
+      <datacite:description xml:lang="dut" descriptionType="Abstract">
+              Het Koninklijk besluit van 20 maart 2014 tot vaststelling van het marien ruimtelijk plan legt in Art. 6, zes visserijzones vast: Visserij regulier regime, Art. 6 § 1; Zone voor specifieke visserijtechniek 1, Art. 6 § 1.1°; Zone voor specifieke visserijtechniek 2, Art. 6 § 1.2°; Zone voor specifieke visserijtechniek 3, Art. 6 § 1.3°; Zone voor specifieke visserijtechniek 4, Art. 6 § 1.4°; Zone voor specifieke visserijtechniek 5, Art. 6 § 3. Deze zones worden digitaal beschikbaar gesteld in de resource beschreven door dit metadata-document.
+              
+              Gelieve het Belgisch Staatsblad te raadplegen voor de officiële referentie-informatie.
+            </datacite:description>
+      <datacite:description xml:lang="fre" descriptionType="Abstract">
+              L'arrêté royal de 20 mars 2014 relatif à l'établissement du plan d'aménagement des espaces marins délimite dans l'Art. 6, six zones de pêche: Pêche au régime régulier, Art. 6 § 1; Zone pour technique de pêche spécifique 1, Art. 6 § 1.1°; Zone pour technique de pêche spécifique 2, Art. 6 § 1.2°; Zone pour technique de pêche spécifique 3, Art. 6 § 1.3°; Zone pour technique de pêche spécifique 4, Art. 6 § 1.4°; Zone pour technique de pêche spécifique 5, Art. 6 § 3.  es zones sont mises à disposition numériquement dans la ressource décrite par ce document de métadonnées.
+              
+              Veuillez consulter le Moniteur belge pour les informations officielles de réference.
+            </datacite:description>
+      <datacite:description xml:lang="ger" descriptionType="Abstract">
+              Der Königliche Erlass vom 20. März 2014 zur Festlegung eines Meeresraumplans definiert in seiner Art. 6, sechs Fischereibewirtschaftungsgebiete: Regelmäßige Regelung, Art. 6 § 1; Fischereimanagementbereich 1, Art. 6 § 1.1 °; Fischereimanagementbereich 2, Art. 6 § 1.2 °; Fischereimanagementbereich 3, Art. 6 § 1.3 °; Fischereimanagementbereich 4, Art. 6 § 1.4 °; Fischereimanagementbereich 5, Art. 6 § 3. Diese Zonen werden in der Ressource, die durch dieses Metadatendokument beschrieben wird, digital zur Verfügung gestellt.
+              
+              Bitte beachten Sie das Belgische Staatsblatt für offizielle Referenzinformationen.
+            </datacite:description>
+   </datacite:descriptions>
+   <datacite:subjects>
+      <datacite:subject xml:lang="eng">Federal government</datacite:subject>
+      <datacite:subject xml:lang="ger">föderale Regierung</datacite:subject>
+      <datacite:subject xml:lang="dut">federale regering</datacite:subject>
+      <datacite:subject xml:lang="fre">gouvernement fédéral</datacite:subject>
+      <datacite:subject xml:lang="eng">Marine Spatial Plan</datacite:subject>
+      <datacite:subject xml:lang="eng" subjectScheme="GEMET - INSPIRE themes, version 1.0">Area management/restriction/regulation zones and reporting units</datacite:subject>
+      <datacite:subject xml:lang="fre" subjectScheme="GEMET - INSPIRE themes, version 1.0">Zones de gestion, de restriction ou de réglementation et unités de déclaration</datacite:subject>
+      <datacite:subject xml:lang="dut" subjectScheme="GEMET - INSPIRE themes, version 1.0">Gebiedsbeheer, gebieden waar beperkingen gelden, gereguleerde gebieden en rapportage-eenheden</datacite:subject>
+      <datacite:subject xml:lang="ger" subjectScheme="GEMET - INSPIRE themes, version 1.0">Bewirtschaftungsgebiete/Schutzgebiete/geregelte Gebiete und Berichterstattungseinheiten</datacite:subject>
+      <datacite:subject xml:lang="eng" subjectScheme="GEMET - Concepts, version 2.4">economic planning</datacite:subject>
+      <datacite:subject xml:lang="eng" subjectScheme="GEMET - Concepts, version 2.4">marine fishery</datacite:subject>
+      <datacite:subject xml:lang="eng" subjectScheme="GEMET - Concepts, version 2.4">fishery policy</datacite:subject>
+      <datacite:subject xml:lang="eng" subjectScheme="GEMET - Concepts, version 2.4">fishing ground</datacite:subject>
+      <datacite:subject xml:lang="eng">Reporting INSPIRE</datacite:subject>
+   </datacite:subjects>
+   <datacite:rightsList>
+      <datacite:rights xml:lang="eng">No conditions apply to access and use.</datacite:rights>
+      <datacite:rights xml:lang="fre">Aucune condition ne s’applique à l'accès et l'utilisation.</datacite:rights>
+      <datacite:rights xml:lang="dut">Geen voorwaarden in verband met toegang en gebruik.</datacite:rights>
+      <datacite:rights xml:lang="ger">Es gelten keine Bedingungen zum Zugang und Nutzung.</datacite:rights>
+   </datacite:rightsList>
+   <datacite:language>eng</datacite:language>
+   <datacite:geoLocations>
+      <datacite:geoLocation>
+         <datacite:geoLocationBox>
+            <datacite:westBoundLongitude>2.292</datacite:westBoundLongitude>
+            <datacite:eastBoundLongitude>3.27217</datacite:eastBoundLongitude>
+            <datacite:southBoundLatitude>51.0937</datacite:southBoundLatitude>
+            <datacite:northBoundLatitude>51.527</datacite:northBoundLatitude>
+         </datacite:geoLocationBox>
+      </datacite:geoLocation>
+   </datacite:geoLocations>
+   <datacite:formats>
+      <datacite:format>application/gml+xml</datacite:format>
+      <datacite:format>XML</datacite:format>
+      <datacite:format>ESRI Shapefile</datacite:format>
+   </datacite:formats>
+   <datacite:contributors/>
+   <datacite:publisher>Royal Belgian Institute for Natural Sciences, Directorate Natural Environment, GeoCell</datacite:publisher>
+   <datacite:creators>
+      <datacite:creator>
+         <datacite:creatorName nameType="Organizational">Royal Belgian Institute for Natural Sciences, Directorate Natural Environment, GeoCell</datacite:creatorName>
+      </datacite:creator>
+      <datacite:creator>
+         <datacite:creatorName nameType="Organizational">FPS Health, food chain safety and environment, DG Environment</datacite:creatorName>
+      </datacite:creator>
+   </datacite:creators>
+</datacite:resource>

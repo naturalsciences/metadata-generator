@@ -6,7 +6,7 @@
 package be.naturalsciences.bmdc.metadata.model.impl;
 
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
-import java.util.Date;
+import be.naturalsciences.bmdc.metadata.model.Thesaurus;
 
 public class Keyword implements IKeyword {
 
@@ -14,20 +14,17 @@ public class Keyword implements IKeyword {
     private String url;
     private String prefLabel;
     private String type;
-    private String thesaurusTitle;
-    private Date thesaurusPublicationDate;
-    private String thesaurusVersion;
-    private String thesaurusUrl;
+    private Thesaurus thesaurus;
 
-    public Keyword(Long seqno, String url, String prefLabel, String type, String thesaurusTitle, Date thesaurusPublicationDate, String thesaurusVersion, String thesaurusUrl) {
+    public Keyword(Long seqno, String url, String prefLabel, String type, Thesaurus thesaurus/*Title, Date thesaurusPublicationDate, String thesaurusVersion, String thesaurusUrl*/) {
         this.seqno = seqno;
         this.url = url;
         this.prefLabel = prefLabel;
         this.type = type;
-        this.thesaurusTitle = thesaurusTitle;
+        /*     this.thesaurusTitle = thesaurusTitle;
         this.thesaurusPublicationDate = thesaurusPublicationDate;
         this.thesaurusVersion = thesaurusVersion;
-        this.thesaurusUrl = thesaurusUrl;
+        this.thesaurusUrl = thesaurusUrl;*/
     }
 
     public Long getSeqno() {
@@ -62,6 +59,14 @@ public class Keyword implements IKeyword {
         this.type = type;
     }
 
+    public Thesaurus getThesaurus() {
+        return thesaurus;
+    }
+
+    public void setThesaurus(Thesaurus thesaurus) {
+        this.thesaurus = thesaurus;
+    }
+    /*
     public String getThesaurusTitle() {
         return thesaurusTitle;
     }
@@ -92,6 +97,6 @@ public class Keyword implements IKeyword {
 
     public void setThesaurusUrl(String thesaurusUrl) {
         this.thesaurusUrl = thesaurusUrl;
-    }
+    }*/
 
 }

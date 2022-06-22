@@ -14,8 +14,8 @@ import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IDatasource;
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
+import be.naturalsciences.bmdc.metadata.model.Thesaurus;
 import be.naturalsciences.bmdc.metadata.model.comparator.DatasourceComparator;
-import gnu.trove.map.hash.THashMap;
 import gnu.trove.set.hash.THashSet;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,11 +36,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.sis.internal.jaxb.gmx.Anchor;
 import org.apache.sis.internal.jaxb.metadata.replace.ReferenceSystemMetadata;
 import org.apache.sis.metadata.iso.DefaultIdentifier;
@@ -64,15 +66,17 @@ import org.apache.sis.metadata.iso.distribution.DefaultFormat;
 import org.apache.sis.metadata.iso.extent.DefaultExtent;
 import org.apache.sis.metadata.iso.extent.DefaultGeographicBoundingBox;
 import org.apache.sis.metadata.iso.extent.DefaultGeographicDescription;
-import org.apache.sis.metadata.iso.extent.DefaultTemporalExtent;
 import org.apache.sis.metadata.iso.identification.DefaultAggregateInformation;
+import org.apache.sis.metadata.iso.identification.DefaultBrowseGraphic;
 import org.apache.sis.metadata.iso.identification.DefaultDataIdentification;
 import org.apache.sis.metadata.iso.identification.DefaultKeywords;
+import org.apache.sis.metadata.iso.identification.DefaultResolution;
 import org.apache.sis.metadata.iso.lineage.DefaultLineage;
 import org.apache.sis.metadata.iso.quality.DefaultConformanceResult;
 import org.apache.sis.metadata.iso.quality.DefaultDataQuality;
 import org.apache.sis.metadata.iso.quality.DefaultDomainConsistency;
 import org.apache.sis.metadata.iso.quality.DefaultScope;
+import org.apache.sis.util.iso.DefaultInternationalString;
 import org.apache.sis.util.iso.SimpleInternationalString;
 import org.apache.sis.xml.NilReason;
 import org.opengis.metadata.Identifier;
@@ -91,9 +95,11 @@ import org.opengis.metadata.distribution.Format;
 import org.opengis.metadata.extent.GeographicDescription;
 import org.opengis.metadata.extent.GeographicExtent;
 import org.opengis.metadata.identification.AssociationType;
+import org.opengis.metadata.identification.BrowseGraphic;
 import org.opengis.metadata.identification.InitiativeType;
 import org.opengis.metadata.identification.KeywordType;
 import org.opengis.metadata.identification.Keywords;
+import org.opengis.metadata.identification.Resolution;
 import org.opengis.metadata.identification.TopicCategory;
 import org.opengis.metadata.maintenance.ScopeCode;
 import org.opengis.metadata.quality.DataQuality;
@@ -134,7 +140,22 @@ public class ISO19115DatasetBuilder {
     private IInstituteRole mdAuthor;
     private boolean useDatasetCitationResponsibleParty;
     private boolean useLinkedDatasetCitationResponsibleParty;
+
+    /**
+     * *
+     * The authority responsible for issuing this dataset's identifier
+     */
     private String identifierAuthority;
+
+    public static String DEFAULT_USE_CONSTRAINTS = "No conditions apply to use.";
+    public static String DEFAULT_ACCESS_CONSTRAINTS = "No limitations on public access.";
+    public static String DEFAULT_LICENSE = "https://creativecommons.org/licenses/by/2.0/";
+
+    public static Set<Restriction> OTHER_RESTRICTIONS_PLACEHOLDER = new LinkedHashSet<>(); //FIXED ORDER!
+
+    static {
+        OTHER_RESTRICTIONS_PLACEHOLDER.add(Restriction.OTHER_RESTRICTIONS);
+    }
 
     /**
      * *
@@ -271,7 +292,7 @@ public class ISO19115DatasetBuilder {
         KEYWORD_TYPE_MAPPING.put("temporal", KeywordType.TEMPORAL);
         KEYWORD_TYPE_MAPPING.put("theme", KeywordType.THEME);
 
-        COUNTRIES = new THashMap();
+        COUNTRIES = new HashMap();
         COUNTRIES.put("99", "Unknown");
         COUNTRIES.put("9X", "inapplicable");
         COUNTRIES.put("AD", "Andorra");
@@ -524,7 +545,7 @@ public class ISO19115DatasetBuilder {
         COUNTRIES.put("ZM", "Zambia");
         COUNTRIES.put("ZW", "Zimbabwe");
 
-        LANGUAGES = new THashMap();
+        LANGUAGES = new HashMap<>();
         LANGUAGES.put("NL", Arrays.asList(new Locale.Builder().setLanguage("Dutch").setLanguageTag("nl-BE").build())); ///*."NL","nld")*/
         LANGUAGES.put("FR", Arrays.asList(Locale.FRENCH)); //FRANCE
         LANGUAGES.put("EN", Arrays.asList(Locale.ENGLISH));
@@ -533,7 +554,7 @@ public class ISO19115DatasetBuilder {
         /*languages.put("NL/FR", Arrays.asList(new Locale("nld"), Locale.FRENCH));
         languages.put("NL/FR/EN", Arrays.asList(new Locale("nld"), Locale.FRENCH, Locale.ENGLISH));
         languages.put("FR/EN", Arrays.asList(Locale.FRENCH, Locale.ENGLISH));*/
-        ROLES = new THashMap<>();
+        ROLES = new HashMap<>();
         ROLES.put(IDataset.Role.RESOURCEPROVIDER, Role.RESOURCE_PROVIDER);
         ROLES.put(IDataset.Role.PUBLISHER, Role.PUBLISHER);
         ROLES.put(IDataset.Role.AUTHOR, Role.AUTHOR);
@@ -546,14 +567,14 @@ public class ISO19115DatasetBuilder {
         ROLES.put(IDataset.Role.PRINCIPAL_INVESTIGATOR, Role.PRINCIPAL_INVESTIGATOR);
         ROLES.put(IDataset.Role.PROCESSOR, Role.PROCESSOR);
 
-        ONLINE_FUNCTIONS = new THashMap<>();
+        ONLINE_FUNCTIONS = new HashMap<>();
         ONLINE_FUNCTIONS.put(OnlinePossibilityEnum.DOWNLOAD, OnLineFunction.DOWNLOAD);
         ONLINE_FUNCTIONS.put(OnlinePossibilityEnum.INFORMATION, OnLineFunction.INFORMATION);
         ONLINE_FUNCTIONS.put(OnlinePossibilityEnum.OFFLINE_ACCESS, OnLineFunction.OFFLINE_ACCESS);
         ONLINE_FUNCTIONS.put(OnlinePossibilityEnum.ORDER, OnLineFunction.ORDER);
         ONLINE_FUNCTIONS.put(OnlinePossibilityEnum.SEARCH, OnLineFunction.SEARCH);
 
-        INSPIRE_THEMES = new THashMap<>();
+        INSPIRE_THEMES = new HashMap<>();
     }
 
     private ISO19115DatasetBuilder() {
@@ -599,11 +620,20 @@ public class ISO19115DatasetBuilder {
      * Create a metadata builder based for a given dataset.
      *
      * @param dataset
+     * @param inspire
+     * @param useAnchor
+     * @param useLinkedDatasetCitationResponsibleParty
+     * @param useDatasetCitationResponsibleParty
+     * @param mdAuthor
+     * @param identifierAuthority
      */
     public ISO19115DatasetBuilder(IDataset dataset, boolean inspire, boolean useAnchor, boolean useDatasetCitationResponsibleParty, boolean useLinkedDatasetCitationResponsibleParty, IInstituteRole mdAuthor, String identifierAuthority) {
         this();
         if (dataset == null) {
             throw new IllegalArgumentException("Provided dataset argument is null.");
+        }
+        if (identifierAuthority == null) {
+            throw new IllegalArgumentException("You must provide the name of the authority that issued this dataset's identifier.");
         }
         this.dataset = dataset;
         this.inspire = inspire;
@@ -639,11 +669,11 @@ public class ISO19115DatasetBuilder {
         return citationDate;
     }
 
-    private String buildAnchorString(String identifier, String name) {
+    private String buildAnchorString(String url, String name) {
         if (name != null) {
-            return "<gmx:Anchor xlink:href=\"" + identifier + "\">" + name + "</gmx:Anchor>";
+            return "<gmx:Anchor xlink:href=\"" + url + "\">" + name + "</gmx:Anchor>";
         } else {
-            return "<gmx:Anchor xlink:href=\"" + identifier + "\"/>";
+            return "<gmx:Anchor xlink:href=\"" + url + "\"/>";
         }
     }
 
@@ -658,11 +688,19 @@ public class ISO19115DatasetBuilder {
      * @param identifier
      * @return
      */
-    private Identifier buildIdentifier(String authorityName, String identifier, String name, boolean useAnchor) {
-        if (useAnchor) {
-            return new DefaultIdentifier(buildCitation(authorityName), buildAnchorString(identifier, name));
+    private Identifier buildGeneralIdentifier(String authorityName, String identifier, String name, boolean useAnchor) {
+        if (authorityName == null || authorityName.equals("")) {
+            if (useAnchor) {
+                return new DefaultIdentifier(buildAnchorString(identifier, name));
+            } else {
+                return new DefaultIdentifier(identifier);
+            }
         } else {
-            return new DefaultIdentifier(buildCitation(authorityName), identifier);
+            if (useAnchor) {
+                return new DefaultIdentifier(buildCitation(authorityName), buildAnchorString(identifier, name));
+            } else {
+                return new DefaultIdentifier(buildCitation(authorityName), identifier);
+            }
         }
     }
 
@@ -692,10 +730,8 @@ public class ISO19115DatasetBuilder {
      */
     private DefaultCitation buildDatasetCitation(IDataset dataset, boolean addResponsibleParties, boolean addOtherCitationDetails) {
         DefaultCitation citation = new DefaultCitation();
-        //org.geotools.util.GrowableInternationalString str = new GrowableInternationalString();
 
         citation.setTitle(new SimpleInternationalString(dataset.getTitle()));
-        //citation.setTitle(str);
         List<CitationDate> dates = new ArrayList<>();
 
         dates.add(buildCreationDate(dataset.getCreationDate()));
@@ -706,7 +742,6 @@ public class ISO19115DatasetBuilder {
         Set<ResponsibleParty> responsibleParties = new HashSet<>();
         TreeSet<IDatasource> datasources = new TreeSet(new DatasourceComparator());
         datasources.addAll(dataset.getDatasources());
-        //datasources.sort(new DatasourceComparator());
 
         StringBuilder otherCitationDetails = null;
         if (addOtherCitationDetails) {
@@ -720,26 +755,36 @@ public class ISO19115DatasetBuilder {
                 otherCitationDetails.append(buildReference(datasource));
                 otherCitationDetails.append(LINE_SEPARATOR);
             }
-            if (addResponsibleParties && datasource.getParties() != null) {
+            if (addResponsibleParties && datasource.getParties() != null) { //authors, custodians, ...
                 for (IInstituteRole party : datasource.getParties()) {
                     Role role = ROLES.get(party.getIsoRole());
 
-                    DefaultResponsibleParty responsibleParty = null;
-
-                    responsibleParty = buildResponsibleParty(role, party.getOrganisationName(), party.getPhone(), party.getFax(), party.getDeliveryPoint(), party.getCity(), party.getPostalCode(), party.getSdnCountryCode(), party.getEmailAddress(), party.getWebsite());
+                    DefaultResponsibleParty responsibleParty = buildResponsibleParty(role, party.getOrganisationName(), party.getPhone(), party.getFax(), party.getDeliveryPoint(), party.getCity(), party.getPostalCode(), party.getSdnCountryCode(), party.getEmailAddress(), party.getWebsite());
 
                     if (responsibleParty != null) {
                         responsibleParties.add(responsibleParty);
                     }
 
                 }
+                citation.setCitedResponsibleParties(responsibleParties);
             }
         }
         if (otherCitationDetails != null) {
             citation.setOtherCitationDetails(new SimpleInternationalString(otherCitationDetails.toString()));
         }
-        citation.setCitedResponsibleParties(responsibleParties);
-        citation.setIdentifiers(singleton(buildIdentifier(identifierAuthority, dataset.getIdentifier(), null, false)));
+
+        Set identifiers = new HashSet();
+        if (dataset.getExternaMetadataUrl() != null) {
+            for (Map.Entry<String, String> entry : dataset.getExternaMetadataUrl().entrySet()) {
+                String key = entry.getKey();
+                String val = entry.getValue();
+                identifiers.add(buildGeneralIdentifier(key, val, val, true));
+            }
+        }
+
+        identifiers.add(buildGeneralIdentifier(identifierAuthority, dataset.getIdentifier(), null, false));
+        citation.setIdentifiers(identifiers);
+
         return citation;
     }
 
@@ -777,7 +822,7 @@ public class ISO19115DatasetBuilder {
         }
     }
 
-    private DefaultCitation buildCitation(IDatasource datasource) {
+    private DefaultCitation buildDatasourceCitation(IDatasource datasource, boolean addResponsibleParties) {
         DefaultCitation citation = new DefaultCitation();
         List<CitationDate> dates = new ArrayList<>();
         CitationDate publicationDate = buildPublicationDate(datasource.getPublicationDate());
@@ -789,21 +834,21 @@ public class ISO19115DatasetBuilder {
 
         Set<ResponsibleParty> responsibleParties = new HashSet<>();
 
-        if (datasource.getParties() != null) {
+        if (addResponsibleParties && datasource.getParties() != null) {
             for (IInstituteRole party : datasource.getParties()) {
                 Role role = ROLES.get(party.getIsoRole());
-                ResponsibleParty ofRole = null;
-                ofRole = buildResponsibleParty(role, party.getOrganisationName(), party.getPhone(), party.getFax(), party.getDeliveryPoint(), party.getCity(), party.getPostalCode(), party.getSdnCountryCode(), party.getEmailAddress(), party.getWebsite());
+                ResponsibleParty responsibleParty = buildResponsibleParty(role, party.getOrganisationName(), party.getPhone(), party.getFax(), party.getDeliveryPoint(), party.getCity(), party.getPostalCode(), party.getSdnCountryCode(), party.getEmailAddress(), party.getWebsite());
 
-                if (ofRole != null) {
-                    responsibleParties.add(ofRole);
+                if (responsibleParty != null) {
+                    responsibleParties.add(responsibleParty);
                 }
             }
+            citation.setCitedResponsibleParties(responsibleParties);
         }
 
         citation.setTitle(new SimpleInternationalString(buildReference(datasource)));
-        citation.setCitedResponsibleParties(responsibleParties);
-        citation.setIdentifiers(singleton(buildIdentifier(identifierAuthority, datasource.getIdentifier(), null, false)));
+
+        citation.setIdentifiers(singleton(buildGeneralIdentifier(identifierAuthority, datasource.getIdentifier(), null, false)));
         return citation;
     }
 
@@ -819,15 +864,12 @@ public class ISO19115DatasetBuilder {
                 contacts.add(buildResponsibleParty(contact));
             }
         }
-        if (!useDatasetCitationResponsibleParty) {
+        if (!useDatasetCitationResponsibleParty) { //don't add the resp parties that have already been added in the the CI_Citation again
             for (IDatasource datasource : dataset.getDatasources()) {
                 if (datasource.getParties() != null) {
                     for (IInstituteRole party : datasource.getParties()) {
                         Role role = ROLES.get(party.getIsoRole());
-
-                        DefaultResponsibleParty responsibleParty = null;
-
-                        responsibleParty = buildResponsibleParty(role, party.getOrganisationName(), party.getPhone(), party.getFax(), party.getDeliveryPoint(), party.getCity(), party.getPostalCode(), party.getSdnCountryCode(), party.getEmailAddress(), party.getWebsite());
+                        DefaultResponsibleParty responsibleParty = buildResponsibleParty(role, party.getOrganisationName(), party.getPhone(), party.getFax(), party.getDeliveryPoint(), party.getCity(), party.getPostalCode(), party.getSdnCountryCode(), party.getEmailAddress(), party.getWebsite());
 
                         if (responsibleParty != null) {
                             contacts.add(responsibleParty);
@@ -836,7 +878,16 @@ public class ISO19115DatasetBuilder {
                 }
             }
         }
-
+        if (dataset.getBrowseGraphicUrl() != null) {
+            Set<BrowseGraphic> graphics = new HashSet<>();
+            URI imageUri = URI.create(dataset.getBrowseGraphicUrl());
+            DefaultBrowseGraphic browseGraphic = new DefaultBrowseGraphic();
+            browseGraphic.setFileDescription(new DefaultInternationalString("large_thumbnail")); //A GeoNetwork shebang to show the image as a thumbnail.
+            browseGraphic.setFileType(FilenameUtils.getExtension(dataset.getBrowseGraphicUrl()));
+            browseGraphic.setFileName(imageUri);
+            graphics.add(browseGraphic);
+            identification.setGraphicOverviews(graphics);
+        }
         identification.setPointOfContacts(contacts);
         identification.setCitation(buildDatasetCitation(dataset, useDatasetCitationResponsibleParty, true)); //don't add the resp. parties in the citation.
         if (dataset.getAbstract() != null) {
@@ -855,7 +906,18 @@ public class ISO19115DatasetBuilder {
         } else {
             identification.setLanguages(singleton(Locale.ENGLISH));
         }
-        identification.setTopicCategories(singleton(TopicCategory.OCEANS));
+        List<TopicCategory> topics = new ArrayList();
+        for (String topic : dataset.getTopicCategory()) {
+            TopicCategory tc = topic == null ? null : TopicCategory.valueOf(topic);
+            if (tc != null) {
+                topics.add(tc);
+            }
+        }
+        if (topics.isEmpty()) {
+            topics.add(TopicCategory.OCEANS);
+        }
+        identification.setTopicCategories(topics);
+
         Collection<DefaultExtent> extent = buildExtent(dataset);
 
         if (extent != null) {
@@ -876,8 +938,21 @@ public class ISO19115DatasetBuilder {
 
         identification.setSpatialRepresentationTypes(singleton(buildSpatialRepresentationType()));
 
-        // identification.setSpatialResolutions(clctn);
+        OptionalDouble max = datasources.stream().map(ds -> ds.getSpatialResolutionDistance())
+                .filter(ds -> Objects.nonNull(ds))
+                .collect(Collectors.toList())
+                .stream().mapToDouble(Double::doubleValue)
+                .max();
+        if (max.isPresent()) {
+            identification.setSpatialResolutions(singleton(buildSpatialResolutionType(max.getAsDouble())));
+        }
         return identification;
+    }
+
+    private Resolution buildSpatialResolutionType(double distance) {
+        DefaultResolution r = new DefaultResolution();
+        r.setDistance(distance);
+        return r;
     }
 
     private SimpleInternationalString buildCountry(String sdnCountryCode) {
@@ -887,7 +962,7 @@ public class ISO19115DatasetBuilder {
 
     private Anchor buildCountryAnchor(String sdnCountryCode) {
         String countryName = COUNTRIES.get(sdnCountryCode);
-        return new Anchor(URI.create("SDN:C32:7:" + sdnCountryCode), countryName);
+        return new Anchor(URI.create("http://vocab.nerc.ac.uk/collection/C32/current/" + sdnCountryCode), countryName);
     }
 
     private List<Locale> buildLanguages(Set<String> languageCodes) {
@@ -905,60 +980,60 @@ public class ISO19115DatasetBuilder {
     }
 
     private DefaultResponsibleParty buildResponsibleParty(Role role, String organisationName, String phone, String fax, String deliveryPoint, String city, String postalCode, String sdnCountryCode, String email, String website) {
-        if (role == null) {
-            role = DEFAULT_ROLE;
-        }
-        DefaultResponsibleParty rp = new DefaultResponsibleParty(role);
-        if (organisationName != null) {
-            rp.setOrganisationName(new SimpleInternationalString(organisationName));
-        }
-        if (phone != null || fax != null || deliveryPoint != null || city != null || postalCode != null || sdnCountryCode != null || website != null) {
-            DefaultContact contact = new DefaultContact();
-            Set<DefaultTelephone> phones = new HashSet<>();
-            if (phone != null) {
-                DefaultTelephone t1 = new DefaultTelephone();
-                t1.setNumber(phone);
-                //t1.setNumberType(TelephoneType.VOICE);
-                phones.add(t1);
+        DefaultResponsibleParty rp = null;
+        if (role != null) {
+            rp = new DefaultResponsibleParty(role);
+            if (organisationName != null) {
+                rp.setOrganisationName(new SimpleInternationalString(organisationName));
             }
-            if (fax != null) {
-                DefaultTelephone t2 = new DefaultTelephone();
-                t2.setNumber(fax);
-                //t2.setNumberType(TelephoneType.FACSIMILE);
-                phones.add(t2);
-            }
-            contact.setPhones(phones);
-            if (deliveryPoint != null || city != null || postalCode != null || sdnCountryCode != null) {
-                DefaultAddress add = new DefaultAddress();
-                if (deliveryPoint != null) {
-                    add.setDeliveryPoints(singleton(deliveryPoint));
+            if (phone != null || fax != null || deliveryPoint != null || city != null || postalCode != null || sdnCountryCode != null || email != null || website != null) {
+                DefaultContact contact = new DefaultContact();
+                Set<DefaultTelephone> phones = new HashSet<>();
+                if (phone != null) {
+                    DefaultTelephone t1 = new DefaultTelephone();
+                    t1.setNumber(phone);
+                    //t1.setNumberType(TelephoneType.VOICE);
+                    phones.add(t1);
                 }
-                if (city != null) {
-                    add.setCity(new SimpleInternationalString(city));
+                if (fax != null) {
+                    DefaultTelephone t2 = new DefaultTelephone();
+                    t2.setNumber(fax);
+                    //t2.setNumberType(TelephoneType.FACSIMILE);
+                    phones.add(t2);
                 }
-                if (postalCode != null) {
-                    add.setPostalCode(postalCode);
-                }
-                if (sdnCountryCode != null) {
-                    if (useAnchor) {
-                        add.setCountry(buildCountryAnchor(sdnCountryCode));
-                    } else {
-                        add.setCountry(buildCountry(sdnCountryCode));
+                contact.setPhones(phones);
+                if (deliveryPoint != null || city != null || postalCode != null || sdnCountryCode != null || email != null) {
+                    DefaultAddress add = new DefaultAddress();
+                    if (deliveryPoint != null) {
+                        add.setDeliveryPoints(singleton(deliveryPoint));
                     }
+                    if (city != null) {
+                        add.setCity(new SimpleInternationalString(city));
+                    }
+                    if (postalCode != null) {
+                        add.setPostalCode(postalCode);
+                    }
+                    if (sdnCountryCode != null) {
+                        if (useAnchor) {
+                            add.setCountry(buildCountryAnchor(sdnCountryCode));
+                        } else {
+                            add.setCountry(buildCountry(sdnCountryCode));
+                        }
+                    }
+                    if (email != null) {
+                        add.setElectronicMailAddresses(singleton(email));
+                    }
+                    contact.setAddresses(singleton(add));
                 }
-                if (email != null) {
-                    add.setElectronicMailAddresses(singleton(email));
+                if (website != null) {
+                    DefaultOnlineResource o = new DefaultOnlineResource(URI.create(website));
+                    o.setProtocol("http");
+                    contact.setOnlineResources(singleton(o));
                 }
-                contact.setAddresses(singleton(add));
-            }
-            if (website != null) {
-                DefaultOnlineResource o = new DefaultOnlineResource(URI.create(website));
-                o.setProtocol("http");
-                contact.setOnlineResources(singleton(o));
-            }
 
-            rp.setContactInfo(contact);
+                rp.setContactInfo(contact);
 
+            }
         }
         return rp;
     }
@@ -987,10 +1062,11 @@ public class ISO19115DatasetBuilder {
         }
 
         //temporal extent
-        if (dataset.getStartDate() != null && dataset.getEndDate() != null) {
+        /*if (dataset.getStartDate() != null && dataset.getEndDate() != null) {
             DefaultTemporalExtent tempExtent = new DefaultTemporalExtent();
+            tempExtent.setBounds(new Date(2000,1,1), new Date(2000,1,1));
             extent.setTemporalElements(singleton(tempExtent));
-        }
+        }*/ //Done in the printer
         result.add(extent);
         return result;
     }
@@ -1030,7 +1106,7 @@ public class ISO19115DatasetBuilder {
     }
 
     private DefaultCitation buildThesaurusCitation(Thesaurus thesaurus) {
-        return buildThesaurusCitation(thesaurus.thesaurusTitle, thesaurus.thesaurusAltTitle, thesaurus.thesaurusUrl, thesaurus.thesaurusPublicationDate, thesaurus.thesaurusVersion);
+        return buildThesaurusCitation(thesaurus.getThesaurusTitle(), thesaurus.getThesaurusAltTitle(), thesaurus.getThesaurusUrl(), thesaurus.getThesaurusDate(), thesaurus.getThesaurusVersion());
 
     }
 
@@ -1064,64 +1140,6 @@ public class ISO19115DatasetBuilder {
         return citation;
     }
 
-    private static class Thesaurus/* implements Comparable<Thesaurus>*/ {
-
-        String thesaurusTitle;
-        String thesaurusUrl;
-        String thesaurusAltTitle;
-        Date thesaurusPublicationDate;
-        String thesaurusVersion;
-        public static final Thesaurus NO_THESAURUS = new Thesaurus(Thesaurus.NOTHING, null, null, null, null);
-        public static final String NOTHING = "NO_THESAURUS";
-
-        public Thesaurus(IKeyword keyword) {
-            this(keyword.getThesaurusTitle() == null ? NOTHING : keyword.getThesaurusTitle(), null, keyword.getThesaurusUrl(), keyword.getThesaurusPublicationDate(), keyword.getThesaurusVersion());
-        }
-
-        public Thesaurus(String thesaurusTitle, String thesaurusAltTitle, String thesaurusUrl, Date thesaurusPublicationDate, String thesaurusVersion) {
-            if (thesaurusTitle == null) {
-                throw new IllegalArgumentException("The thesaurus must have a title.");
-            }
-            this.thesaurusTitle = thesaurusTitle;
-            this.thesaurusAltTitle = thesaurusAltTitle;
-            this.thesaurusPublicationDate = thesaurusPublicationDate;
-            this.thesaurusVersion = thesaurusVersion;
-            this.thesaurusUrl = thesaurusUrl;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 23 * hash + Objects.hashCode(this.thesaurusUrl);
-            hash = 23 * hash + Objects.hashCode(this.thesaurusTitle);
-            hash = 23 * hash + Objects.hashCode(this.thesaurusPublicationDate);
-            hash = 23 * hash + Objects.hashCode(this.thesaurusVersion);
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other == this) {
-                return true;
-            } else if (other instanceof Thesaurus) {
-                Thesaurus otherThesaurus = (Thesaurus) other;
-                Date localThesaurusPublicationDate = this.thesaurusPublicationDate == null ? new Date() : this.thesaurusPublicationDate;
-                String localThesaurusVersion = this.thesaurusVersion == null ? "" : this.thesaurusVersion;
-
-                Date otherThesaurusPublicationDate = otherThesaurus.thesaurusPublicationDate == null ? new Date() : otherThesaurus.thesaurusPublicationDate;
-                String otherThesaurusVersion = otherThesaurus.thesaurusVersion == null ? "" : otherThesaurus.thesaurusVersion;
-
-                return otherThesaurus.thesaurusTitle.equals(this.thesaurusTitle) && localThesaurusPublicationDate.equals(otherThesaurusPublicationDate) && localThesaurusVersion.equals(otherThesaurusVersion);
-            }
-            return false;
-        }
-
-        /*  @Override
-        public int compareTo(Thesaurus t) {
-            
-        }*/
-    }
-
     private Collection<Keywords> buildKeywords(Collection<IKeyword> keywords) {
         Collection<Keywords> allKeywords = new LinkedHashSet<>(); //TreeSet<>(new KeywordsComparator()); //maintain insertion order
 
@@ -1130,8 +1148,10 @@ public class ISO19115DatasetBuilder {
 
             for (IKeyword keyword : keywords) {
 
-                Thesaurus thesaurus = new Thesaurus(keyword);
-                List<IKeyword> get = intKeywords.get(new Thesaurus(keyword));
+                // Thesaurus thesaurus = new Thesaurus(keyword);
+                // List<IKeyword> get = intKeywords.get(new Thesaurus(keyword));
+                Thesaurus thesaurus = keyword.getThesaurus();
+                List<IKeyword> get = intKeywords.get(thesaurus);
                 if (get != null) {
                     get.add(keyword);
                     intKeywords.put(thesaurus, get);
@@ -1160,7 +1180,7 @@ public class ISO19115DatasetBuilder {
                 }
 
                 individualKeyword.setKeywords(kws);
-                if (!thesaurus.equals(Thesaurus.NO_THESAURUS)) {
+                if (thesaurus != null && !thesaurus.equals(Thesaurus.NO_THESAURUS)) {
                     individualKeyword.setThesaurusName(buildThesaurusCitation(thesaurus));
                 }
 
@@ -1186,33 +1206,84 @@ public class ISO19115DatasetBuilder {
         return keyword;
     }
 
+    private Set<Constraints> useConstraints = new LinkedHashSet();
+
+    private void buildGeneralUseConstraints(String useConstraintString) {
+        DefaultLegalConstraints useConstraint = new DefaultLegalConstraints();
+        if (useConstraintString != null) {
+            useConstraint.setUseConstraints(OTHER_RESTRICTIONS_PLACEHOLDER);
+            useConstraint.setOtherConstraints(singleton(new SimpleInternationalString(useConstraintString)));
+            useConstraints.add(useConstraint);
+        }
+
+    }
+
+    private void buildUseConstraintsForLicense(String licenseURl) {
+        DefaultLegalConstraints useConstraint = new DefaultLegalConstraints();
+        useConstraint.setUseConstraints(OTHER_RESTRICTIONS_PLACEHOLDER);
+        if (licenseURl == null) {
+            if (useAnchor) {
+                Anchor license = new Anchor(URI.create(DEFAULT_LICENSE), DEFAULT_LICENSE);
+                if (inspire) {
+                    Collection<Anchor> useConstraints = new HashSet<Anchor>();
+                    Anchor inspireBazaar = new Anchor(URI.create("http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"), "No conditions apply to access and use");
+                    useConstraints.add(inspireBazaar);
+                    useConstraints.add(license);
+                    useConstraint.setOtherConstraints(useConstraints);
+                } else {
+                    useConstraint.setOtherConstraints(singleton(license));
+                }
+            } else {
+                useConstraint.setOtherConstraints(singleton(new SimpleInternationalString(DEFAULT_LICENSE)));
+            }
+        } else {
+            if (useAnchor) {
+                Anchor license = new Anchor(URI.create(licenseURl), licenseURl);
+                if (inspire) {
+                    Collection<Anchor> useConstraints = new HashSet<Anchor>();
+                    Anchor inspireBazaar = new Anchor(URI.create("http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply"), "No conditions apply to access and use");
+                    useConstraints.add(inspireBazaar);
+                    useConstraints.add(license);
+                    useConstraint.setOtherConstraints(useConstraints);
+                } else {
+                    useConstraint.setOtherConstraints(singleton(license));
+                }
+            } else {
+                useConstraint.setOtherConstraints(singleton(new SimpleInternationalString(licenseURl)));
+            }
+        }
+        useConstraints.add(useConstraint); //to ensure that  the default use constraint will not be added multiple times
+    }
+
     private Set<Constraints> buildConstraints() {
-        Set<Constraints> results = new LinkedHashSet(); //fixed order of addition
+        Set<Constraints> allConstraints = new LinkedHashSet(); //fixed order of addition
 
-        Set<Restriction> restrictions = new LinkedHashSet<>();//fixed order of addition
-        restrictions.add(Restriction.OTHER_RESTRICTIONS);
-        /* Set<Restriction> license = new HashSet<>();
-        license.add(Restriction.LICENSE);*/
-
-        DefaultLegalConstraints useLimitation = new DefaultLegalConstraints();
-        useLimitation.setUseLimitations(singleton(new SimpleInternationalString("No conditions apply to access and use.")));
-        // useLimitation.setAccessConstraints(restrictions);
-        results.add(useLimitation);
+        buildUseConstraintsForLicense(dataset.getLicenseUrl());
+        buildGeneralUseConstraints(dataset.getTermsUrl());
+        buildGeneralUseConstraints(dataset.getLiability());
+        allConstraints.addAll(useConstraints);
 
         DefaultLegalConstraints accessConstraints = new DefaultLegalConstraints();
-        accessConstraints.setAccessConstraints(restrictions);
-        accessConstraints.setOtherConstraints(singleton(new SimpleInternationalString("No limitations apply to access.")));
-        results.add(accessConstraints);
+        accessConstraints.setAccessConstraints(OTHER_RESTRICTIONS_PLACEHOLDER);
+        if (dataset.getAccessLimitations() == null) {
+            accessConstraints.setOtherConstraints(singleton(new SimpleInternationalString(DEFAULT_ACCESS_CONSTRAINTS)));
+        } else {
+            accessConstraints.setOtherConstraints(singleton(new SimpleInternationalString(dataset.getAccessLimitations())));
+        }
+        allConstraints.add(accessConstraints);
 
-        DefaultLegalConstraints useConstraints = new DefaultLegalConstraints();
-        useConstraints.setUseConstraints(restrictions);
-        useConstraints.setOtherConstraints(singleton(new SimpleInternationalString("https://creativecommons.org/licenses/by/2.0/")));
-        results.add(useConstraints);
+        DefaultLegalConstraints useLimitation = new DefaultLegalConstraints();
+        if (dataset.getUseConditions() == null) {
+            useLimitation.setUseLimitations(singleton(new SimpleInternationalString(DEFAULT_USE_CONSTRAINTS))); //"No conditions apply to access and use."
+        } else {
+            useLimitation.setUseLimitations(singleton(new SimpleInternationalString(dataset.getUseConditions())));
+        }
+        allConstraints.add(useLimitation);
 
         DefaultSecurityConstraints securityConstraint = new DefaultSecurityConstraints();
         securityConstraint.setClassification(Classification.UNCLASSIFIED);
-        results.add(securityConstraint);
-        return results;
+        allConstraints.add(securityConstraint);
+        return allConstraints;
     }
 
     private Set<Format> buildDumbFormat(Collection<IDistributionResource> distributionResources) {
@@ -1255,10 +1326,10 @@ public class ISO19115DatasetBuilder {
                     distributor.setDistributorContact(buildResponsibleParty(distributionResource.getDistributor()));
                     distributor.setDistributorFormats(buildFormat(new HashSet(distributionResource.getDistributionFormats())));
 
-                    Double dataSizeInBytes = distributionResource.getDataSizeInMB();
+                    Double dataSizeInMegaBytes = distributionResource.getDataSizeInMegaBytes();
                     DefaultDigitalTransferOptions digiTrans = new DefaultDigitalTransferOptions();
-                    if (dataSizeInBytes != null && !dataSizeInBytes.isNaN() && !dataSizeInBytes.isInfinite() && dataSizeInBytes > 0) {
-                        digiTrans.setTransferSize(distributionResource.getDataSizeInMB());
+                    if (dataSizeInMegaBytes != null && !dataSizeInMegaBytes.isNaN() && !dataSizeInMegaBytes.isInfinite() && dataSizeInMegaBytes > 0) {
+                        digiTrans.setTransferSize(distributionResource.getDataSizeInMegaBytes());
                     }
                     distributor.setDistributorTransferOptions(singleton(digiTrans));
 
@@ -1321,15 +1392,15 @@ public class ISO19115DatasetBuilder {
             inspireCompliancy.setResults(singleton(result));
 
             quality.setReports(singleton(inspireCompliancy));
-            qualities.add(quality);
         }
+        qualities.add(quality);
         return qualities;
 
     }
 
     private DefaultCitation buildInspireCitation() {
         DefaultCitation citation = new DefaultCitation();
-        citation.setTitle(new SimpleInternationalString("COMMISSION REGULATION (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services"));
+        citation.setTitle(buildAnchor("https://eur-lex.europa.eu/eli/reg/2010/1089", "COMMISSION REGULATION (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services"));
         citation.setDates(singleton(buildCitationDate(INSPIRE_IMPLEMENTING_RULES_PUBLICATION_DATE, DateType.PUBLICATION, null)));
         return citation;
     }
@@ -1348,17 +1419,17 @@ public class ISO19115DatasetBuilder {
                 aggregateInfos.add(aggregateInfo);
             }
         }
-        if (datasources != null) {
+        /*if (datasources != null) { //ignore this for now as it is not really informative
             for (IDatasource datasource : datasources) {
                 DefaultAggregateInformation aggregateInfo = new DefaultAggregateInformation();
-                DefaultCitation citation = buildCitation(datasource);
+                DefaultCitation citation = buildDatasourceCitation(datasource, useLinkedDatasetCitationResponsibleParty);
 
                 aggregateInfo.setAggregateDataSetName(citation);
                 aggregateInfo.setInitiativeType(InitiativeType.COLLECTION);
                 aggregateInfo.setAssociationType(AssociationType.SOURCE);
                 aggregateInfos.add(aggregateInfo);
             }
-        }
+        }*/
         if (masterDatasets == null && datasources == null) {
             return null;
         }
@@ -1403,9 +1474,9 @@ public class ISO19115DatasetBuilder {
             }
 
             identifier = new ImmutableIdentifier(RScitation, "L10", epsgCode);
-        } else if (inspire) {
+        }/* else if (inspire) {
             identifier = new ImmutableIdentifier(null, "EPSG", "http://www.opengis.net/def/crs/EPSG/0/3035");
-        } else {
+        }*/ else {
             identifier = new ImmutableIdentifier(null, "EPSG", "http://www.opengis.net/def/crs/EPSG/0/" + epsgCode);
         }
 
@@ -1414,10 +1485,10 @@ public class ISO19115DatasetBuilder {
     }
 
     public String getFileName() {
-        return dataset.getFileName();
+        return dataset.getMetadataFileName();
     }
 
-     /**
+    /**
      * *
      * Construct the ISO 19115 metadata content of the Dataset provided in the
      * constructor, or return the already constructed metadata if done so.

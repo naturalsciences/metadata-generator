@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>be.naturalsciences.bmdc.metadata</groupId>
     <artifactId>MetadataGenerator</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -82,12 +82,12 @@
             <groupId>be.naturalsciences.bmdc</groupId>
             <artifactId>bmdc-utils</artifactId>
             <version>1.0</version>
-            <exclusions>
+            <!--   <exclusions>
                 <exclusion>
                     <groupId>com.sun.xml.bind</groupId>
                     <artifactId>jaxb-impl</artifactId>
                 </exclusion>
-            </exclusions>
+            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -110,6 +110,27 @@
             <artifactId>jarchivelib</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>be.naturalsciences.bmdc</groupId>
+            <artifactId>datacite-demo</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.7</version>
+            <type>jar</type>
+        </dependency>
+        <!--    <dependency>
+            <groupId>org.glassfish.main.extras</groupId>
+            <artifactId>glassfish-embedded-all</artifactId>
+            <version>3.1.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>--><!-->needed for java 11-->
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

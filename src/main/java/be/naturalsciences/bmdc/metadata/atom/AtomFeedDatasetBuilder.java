@@ -8,8 +8,6 @@ package be.naturalsciences.bmdc.metadata.atom;
 import be.naturalsciences.bmdc.metadata.model.IDataset;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
 import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
-import com.rometools.rome.feed.synd.SyndContent;
-import com.rometools.rome.feed.synd.SyndContentImpl;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
 import com.rometools.rome.feed.synd.SyndFeed;
@@ -24,15 +22,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import static java.util.Collections.singleton;
 
 /**
  *
  * @author thomas
- * 
- * The creation of ATOM dataset feeds with this class has not been used in production.
+ *
+ * The creation of ATOM dataset feeds with this class has not been used in
+ * production.
  */
- @Deprecated
+@Deprecated
 public class AtomFeedDatasetBuilder {
 
     private final IDataset dataset;
@@ -104,7 +102,7 @@ public class AtomFeedDatasetBuilder {
 
         String xml = createXMLString(author);
         if (xml != null) {
-            try (PrintWriter out = new PrintWriter(file)) {
+            try ( PrintWriter out = new PrintWriter(file)) {
                 out.println(xml);
             }
         }

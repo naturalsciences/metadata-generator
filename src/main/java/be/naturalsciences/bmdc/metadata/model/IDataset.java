@@ -10,8 +10,8 @@ import be.naturalsciences.bmdc.metadata.model.IDatasource;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
 import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
+import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import java.util.Collection;
@@ -124,7 +124,7 @@ public interface IDataset extends Serializable {
 
     public void setDistributionResources(Collection<IDistributionResource> distributionResources);
 
-    public boolean addDistributionResource(String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats) throws MalformedURLException, URISyntaxException;
+    public boolean addDistributionResource(boolean placeHolder, String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats, IInstituteRole distributor, String crs) throws IOException, URISyntaxException;
 
     public void setPointsOfContact(Collection<IInstituteRole> pointsOfContact);
 
@@ -144,9 +144,48 @@ public interface IDataset extends Serializable {
 
     public void setSpatialType(SpatialType spatialType);
 
-    public String getFileName();
+    public String getMetadataFileName();
 
-    public String getMetadataUrlXML();
+    public void setMetadataFileName(String metadataFileName);
+
+    public String getMetadataUrlComputer();
+
+    public void setMetadataUrlComputer(String metadataUrlComputer);
 
     public String getMetadataUrlHuman();
+
+    public void setMetadataUrlHuman(String metadataUrlHuman);
+
+    public String getBrowseGraphicUrl();
+
+    public void setBrowseGraphicUrl(String browseImageUrl);
+
+    public String getTermsUrl();
+
+    public void setTermsUrl(String termsUrl);
+
+    public String getAccessLimitations();
+
+    public void setAccessLimitations(String accessLimitations);
+
+    public String getUseConditions();
+
+    public void setUseConditions(String useConditions);
+
+    public String getLiability();
+
+    public void setLiability(String liability);
+
+    public String getLicenseUrl();
+
+    public void setLicenseUrl(String licenseUrl);
+
+    public Map<String,String> getExternaMetadataUrl();
+
+    public void setExternaMetadataUrl(Map<String,String> externalDefinitionUrl);
+    
+    public List<String> getTopicCategory();
+    
+     public void setTopicCategory(List<String> topicCategory);
+
 }
