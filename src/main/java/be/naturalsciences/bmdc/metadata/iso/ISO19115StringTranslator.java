@@ -8,20 +8,16 @@ package be.naturalsciences.bmdc.metadata.iso;
 import be.naturalsciences.bmdc.utils.LocalizedString;
 import be.naturalsciences.bmdc.utils.xml.XMLElement;
 import be.naturalsciences.bmdc.utils.xml.XMLUtils;
-import static be.naturalsciences.bmdc.utils.xml.XMLUtils.xpathQueryNodes;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -132,11 +128,15 @@ public class ISO19115StringTranslator {
         if (translationString != null && !translationString.isEmpty()) {
             for (Map.Entry<String, Set<LocalizedString>> entry : translationString.entrySet()) {
                 String searchFor = entry.getKey();
-                Set<LocalizedString> translations = entry.getValue();
-                XMLElement element = new XMLElement("gco:CharacterString", searchFor, null, null);
-                translate(element, translations);
-                element = new XMLElement("gmx:Anchor", searchFor, null, null);
-                translate(element, translations);
+                if (searchFor != null) {
+                    Set<LocalizedString> translations = entry.getValue();
+                    XMLElement element = new XMLElement("gco:CharacterString", searchFor, null, null);
+                    translate(element, translations);
+                    element = new XMLElement("gmx:Anchor", searchFor, null, null);
+                    translate(element, translations);
+                } else {
+                    //if we have an empty element that has translations, this would mean every single string needs to be translated.
+                }
             }
         }
     }
@@ -144,12 +144,12 @@ public class ISO19115StringTranslator {
     public void translate(XMLElement element, Set<LocalizedString> translations) {
         if (element != null && translations != null && !translations.isEmpty()) {//were any elements or translations provided?
             try {
-                List<Node> nodes = xpathQueryNodes(document, element.toXPath(), ISO19115DatasetPrinter.MD_NAMESPACES); //is the element even present in the document??
+                List<Node> nodes = XMLUtils.xpathQueryNodes(document, element.toXPath(), ISO19115DatasetPrinter.MD_NAMESPACES); //is the element even present in the document??
                 if (nodes != null && !nodes.isEmpty()) {
                     StringBuilder freeTextBuilder = new StringBuilder("<gmd:PT_FreeText xmlns:gmd=\"http://www.isotc211.org/2005/gmd\">"); //the namespace is needed!
                     for (LocalizedString localizedString : translations) {
                         String language = localizedString.getLanguageString().toUpperCase();
-                        String translation = localizedString.getUnderlyingString();
+                        String translation = XMLUtils.replaceXMLTextNode(localizedString.getUnderlyingString());
                         if (translation != null) {
                             translatedLanguages.add(language);
                             freeTextBuilder.append("<gmd:textGroup><gmd:LocalisedCharacterString locale=\"#").append(language).append("\">").append(translation).append("</gmd:LocalisedCharacterString></gmd:textGroup>");

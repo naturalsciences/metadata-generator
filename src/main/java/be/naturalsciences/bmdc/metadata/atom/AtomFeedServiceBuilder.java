@@ -78,13 +78,13 @@ public class AtomFeedServiceBuilder {
             isoMetadataUrl.setRel("describedby");
             isoMetadataUrl.setType("application/xml");
             isoMetadataUrl.setTitle("Full metadata for this dataset");
-            isoMetadataUrl.setHref(dataset.getMetadataUrlXML());
+            isoMetadataUrl.setHref(dataset.getMetadataUrlComputer());
 
             SyndLink downloadUrl = new SyndLinkImpl();
             downloadUrl.setRel("alternate");
             downloadUrl.setType("application/atom+xml");
             downloadUrl.setTitle("Full metadata for this dataset");
-            downloadUrl.setHref(dataset.getMetadataUrlXML());
+            downloadUrl.setHref(dataset.getMetadataUrlComputer());
 
         }
         return new SyndFeedOutput().outputString(feed);

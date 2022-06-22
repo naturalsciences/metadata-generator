@@ -45,12 +45,18 @@ public interface IDistributionResource extends Serializable {
 
     void setDistributionFormats(List<IDistributionFormat> formats);
 
-    Double getDataSizeInMB();
+    Double getDataSizeInMegaBytes();
 
-    void setDataSizeInBytes(Double dataSizeInBytes);
+    void setDataSizeInMegaBytes(Double dataSizeInBytes);
 
     public IInstituteRole getDistributor();
 
     public void setDistributors(IInstituteRole distributor);
+
+    public boolean isInspire();
+
+    String getCrs();
+
+    void setCrs(String crs);
 
 }

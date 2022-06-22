@@ -5,6 +5,8 @@
  */
 package be.naturalsciences.bmdc.metadata.iso;
 
+import be.naturalsciences.bmdc.metadata.datacite.PostIsoMetadataTest;
+import be.naturalsciences.bmdc.metadata.datacite.ISO19115toDataCitePublisher;
 import static be.naturalsciences.bmdc.metadata.iso.ISO19115DatasetBuilder.LANGUAGES;
 import static java.util.Collections.singleton;
 import be.naturalsciences.bmdc.metadata.model.FormatEnum;
@@ -16,6 +18,7 @@ import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
 import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
 import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
+import be.naturalsciences.bmdc.metadata.model.Thesaurus;
 import be.naturalsciences.bmdc.metadata.model.impl.Dataset;
 import be.naturalsciences.bmdc.metadata.model.impl.Datasource;
 import be.naturalsciences.bmdc.metadata.model.impl.DistributionFormat;
@@ -24,8 +27,8 @@ import be.naturalsciences.bmdc.metadata.model.impl.InstituteRole;
 import be.naturalsciences.bmdc.metadata.model.impl.Keyword;
 import be.naturalsciences.bmdc.utils.FileUtils;
 import be.naturalsciences.bmdc.utils.LocalizedString;
-import be.naturalsciences.bmdc.utils.ObjectUtils;
 import be.naturalsciences.bmdc.utils.StringUtils;
+import demo.datacite.mds.account.Account;
 import gnu.trove.set.hash.THashSet;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +42,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -65,7 +67,8 @@ import org.junit.Ignore;
  */
 public class ISO19115DatasetPrinterTest {
 
-    public static Map<String, Set<LocalizedString>> TRANSLATIONS = new LinkedHashMap<>(); //Maintain insertion order!
+    public static final Account TEST_RBINS = new Account("DELFT.RBINS", "RBINS1846", "10.5072");
+    public static final Map<String, Set<LocalizedString>> TRANSLATIONS = new LinkedHashMap<>(); //Maintain insertion order!
 
     public static IInstituteRole BMDC_CONTACT = null;
     public static IInstituteRole BMDC_AUTHOR = null;
@@ -88,6 +91,8 @@ public class ISO19115DatasetPrinterTest {
     public static String BELGIUM_NL = "België";
     public static String BELGIUM_FR = "Belgique";
     public static String BELGIUM_DE = "Belgien";
+
+    public static String MSFD_IMAGE = "http://geonetwork.bmdc.be/geonetwork/images/logos/MSFD-logo.jpg";
 
     static {
         BMDC_CONTACT = new InstituteRole(IDataset.Role.POINT_OF_CONTACT, BMDC_EN, BMDC_PHONE, null, RBINS_ADRESS, BRUSSELS_NAME, BRUSSELS_POSTAL_CODE, BELGIUM_ISO_3166, BMDC_EMAIL, BMDC_WEBSITE);
@@ -144,7 +149,7 @@ public class ISO19115DatasetPrinterTest {
         //themes.add(IDataset.InspireTheme.OCEANOGRAPHIC_GEOGRAPHICAL_FEATURES);
 
         Dataset dst = new Dataset("bmdc:dst::5020", "Data from 'Advanced modelling and research on...'", creationDate, revisionDate, new HashSet(Arrays.asList("NL", "EN")), "4326", null, null, sources, "Dataset combined from two publications. Contains parameters on salinity, temperature, biota composition and mainly biodiversity. Gathered from 2005 to 2008. Belgica research vessel during cruises...", startDate, endDate, 50.0, 52.0, 2.0, 3.0, resources, "Dataset combined from sources. Descriptive staistical analysis performed.", themes, null, IDataset.SpatialType.VECTOR, createKeywords());
-
+        dst.setBrowseGraphicUrl(MSFD_IMAGE);
         return dst;
     }
 
@@ -176,14 +181,19 @@ public class ISO19115DatasetPrinterTest {
         titles.add(new LocalizedString("Die daten datasets 'Advanced modelling and research on...'", Locale.GERMAN));
         dst.setMultilingualTitles(titles);
         dst.setPointsOfContact(singleton(BMDC_CUSTODIAN));
+        dst.setBrowseGraphicUrl(MSFD_IMAGE);
         return dst;
     }
 
-    public static IKeyword k1 = new Keyword(0L, "http://www.eionet.europa.eu/gemet/concept/15228", "Marine Strategy Framework Directive", "theme", "GEMET - Concepts, version 4.1.2", new Date(), "4.1.2", "https://www.eionet.europa.eu/gemet/en/themes/");
-    public static IKeyword k3 = new Keyword(0L, "http://inspire.ec.europa.eu/theme/sr", "Sea regions", "theme", "GEMET - INSPIRE themes, version 1.0", new Date(), "1.0", "https://www.eionet.europa.eu/gemet/inspire-themes/");
-    public static IKeyword k4 = new Keyword(0L, "http://cdr.eionet.europa.eu/help/msfd/Schemas/MSFDCommon_2018.xsd#D11C1", "MD11C1 - Anthropogenic impulsive sound", "theme", "Eionet Central Data Repository", new Date(), null, "http://cdr.eionet.europa.eu/help/msfd/Schemas/MSFDCommon_2018.xsd");
-    public static IKeyword k5 = new Keyword(0L, "http://marineregions.org/mrgid/26567", "Belgian part of the North Sea", "place", "Marine Regions", new Date(), "10", "http://marineregions.org");
-    public static IKeyword k6 = new Keyword(0L, "http://marineregions.org/mrgid/50155", "Greater North Sea, incl. the Kattegat and the English Channel", "place", "Marine Regions", new Date(), "10", "http://marineregions.org");
+    public static Thesaurus gemet = new Thesaurus("GEMET - Concepts, version 4.1.2", null, "https://www.eionet.europa.eu/gemet/en/themes/", new Date(), "4.1.2", Thesaurus.PUBLICATION);
+    public static Thesaurus mr = new Thesaurus("Marine Regions", null, "http://marineregions.org", new Date(), "10", Thesaurus.PUBLICATION);
+    public static Thesaurus eionet = new Thesaurus("Eionet Central Data Repository", null, "http://cdr.eionet.europa.eu/help/msfd/Schemas/MSFDCommon_2018.xsd", new Date(), null, Thesaurus.PUBLICATION);
+
+    public static IKeyword k1 = new Keyword(0L, "http://www.eionet.europa.eu/gemet/concept/15228", "Marine Strategy Framework Directive", "theme", gemet);
+    public static IKeyword k3 = new Keyword(0L, "http://inspire.ec.europa.eu/theme/sr", "Sea regions", "theme", gemet);
+    public static IKeyword k4 = new Keyword(0L, "http://cdr.eionet.europa.eu/help/msfd/Schemas/MSFDCommon_2018.xsd#D11C1", "MD11C1 - Anthropogenic impulsive sound", "theme", eionet);
+    public static IKeyword k5 = new Keyword(0L, "http://marineregions.org/mrgid/26567", "Belgian part of the North Sea", "place", mr);
+    public static IKeyword k6 = new Keyword(0L, "http://marineregions.org/mrgid/50155", "Greater North Sea, incl. the Kattegat and the English Channel", "place", mr);
 
     private static Set<IKeyword> createKeywords() {
         Set<IKeyword> keywords = new HashSet<>();
@@ -197,7 +207,9 @@ public class ISO19115DatasetPrinterTest {
 
     private static String getUntranslatedKeywordXML(IKeyword keyword) {
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        Thesaurus keywordThesaurus = keyword.getThesaurus();
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         return ("<gmd:keyword>"
                 + "            <gmx:Anchor xlink:href=\"" + keyword.getUrl() + "\">" + keyword.getPrefLabel() + "</gmx:Anchor>"
                 + "          </gmd:keyword>"
@@ -207,21 +219,21 @@ public class ISO19115DatasetPrinterTest {
                 + "          <gmd:thesaurusName>"
                 + "            <gmd:CI_Citation>"
                 + "              <gmd:title>"
-                + keyword.getThesaurusUrl() == null ? "<gco:CharacterString >" + keyword.getThesaurusTitle() + "</gco:CharacterString>" : "<gmx:Anchor xlink:href=\"" + keyword.getThesaurusUrl() + "\">" + keyword.getThesaurusTitle() + "</gmx:Anchor>"
+                + keywordThesaurus.getThesaurusUrl() == null ? "<gco:CharacterString >" + keywordThesaurus.getThesaurusTitle() + "</gco:CharacterString>" : "<gmx:Anchor xlink:href=\"" + keywordThesaurus.getThesaurusUrl() + "\">" + keywordThesaurus.getThesaurusTitle() + "</gmx:Anchor>"
                 + "              </gmd:title>"
                 + "              <gmd:date>"
                 + "                <gmd:CI_Date>"
                 + "                  <gmd:date>"
-                + "                    <gco:DateTime>" + df.format(keyword.getThesaurusPublicationDate()) + "</gco:DateTime>"
+                + "                    <gco:Date>" + df.format(keywordThesaurus.getThesaurusDate()) + "</gco:Date>"
                 + "                  </gmd:date>"
                 + "                  <gmd:dateType>"
                 + "                    <gmd:CI_DateTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>"
                 + "                  </gmd:dateType>"
                 + "                </gmd:CI_Date>"
                 + "              </gmd:date>"
-                + (keyword.getThesaurusVersion() != null
+                + (keywordThesaurus.getThesaurusVersion() != null
                 ? "              <gmd:edition>"
-                + "                <gco:CharacterString>" + keyword.getThesaurusVersion() + "</gco:CharacterString>"
+                + "                <gco:CharacterString>" + keywordThesaurus.getThesaurusVersion() + "</gco:CharacterString>"
                 + "              </gmd:edition>" : "")
                 + "            </gmd:CI_Citation>"
                 + "          </gmd:thesaurusName>").replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "");
@@ -250,19 +262,20 @@ public class ISO19115DatasetPrinterTest {
      * Test of getResult method, of class ISO19115DatasetPrinter.
      */
     @Test
-    @Ignore
     public void testGetResult() throws IOException, FileNotFoundException, JAXBException {
         System.out.println("getResult");
         Dataset ds1 = createFakeDataset1();
         //testXML(ds1);
-        testNoAnchor(ds1);
+        //testNoAnchor(ds1);
         testAnchor(ds1);
 
         IDataset ds2 = createFakeDataset2();
         testXML(ds2);
-        testNoAnchor(ds2);
+        testDOI(ds2);
+        //testNoAnchor(ds2);
         testAnchor(ds2);
         testTranslatedTitle(ds2);
+        testAnchorForLaw(ds2);
     }
 
     /**
@@ -295,13 +308,13 @@ public class ISO19115DatasetPrinterTest {
         ISO19115DatasetPrinter printer2 = null;
         if (ds != null) {
             builder = new ISO19115DatasetBuilder(ds, false, true, false, false, BMDC_CONTACT, "Belgian Marine Data Centre");
-            printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS);
+            printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         }
 
         IDataset ds2 = createFakeDataset2();
         if (ds2 != null) {
             builder2 = new ISO19115DatasetBuilder(ds2, false, true, false, false, BMDC_CONTACT, "Belgian Marine Data Centre");
-            printer2 = new ISO19115DatasetPrinter(builder2, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS);
+            printer2 = new ISO19115DatasetPrinter(builder2, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         }
         if (printer != null && !printer.equals(printer2)) {
             innerTestCreateFile(builder, "TEST_EQUALS_" + builder.getFileName());
@@ -316,9 +329,17 @@ public class ISO19115DatasetPrinterTest {
         assertTrue(printer.equals(printer2));
     }
 
+    private void testDOI(IDataset dst) throws IOException, JAXBException {
+        ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(dst, false, true, false, false, null, "Belgian Marine Data Centre");
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(TEST_RBINS), false);
+        String xml = printer.getResult();
+        String id = dst.getIdentifier();
+        //assertTrue(xml.contains("<gmx:Anchor xlink:href=\"https://doi.org/10.5072/" + id + "\">10.5072/" + id + "</gmx:Anchor>"));
+    }
+
     private void testXML(IDataset dst) throws IOException, JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(dst, false, true, false, false, null, "Belgian Marine Data Centre");
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         String xml = printer.getResult();
         System.out.println(xml);
         assertTrue(xml.contains("xml version=\"1.0\""));
@@ -343,11 +364,16 @@ public class ISO19115DatasetPrinterTest {
         assertTrue(xml.contains("<gmd:PT_Locale id=\"NL\">"));
         assertTrue(xml.contains("<gmd:PT_Locale id=\"FR\">"));
         assertTrue(xml.contains("Royal Belgian Institute for Natural Sciences, Directorate Natural Environment, Belgian Marine Data Centre (BMDC)"));
-        assertTrue(xml.contains("<gmd:MD_SpatialRepresentationTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode\" codeListValue=\"textTable\">Text table</gmd:MD_SpatialRepresentationTypeCode>"));
+//        assertTrue(xml.contains("<gmd:MD_SpatialRepresentationTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode\" codeListValue=\"textTable\">Text table</gmd:MD_SpatialRepresentationTypeCode>"));
 
-        assertTrue(xml.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "").contains(getUntranslatedKeywordXML(k1)));
-        assertTrue(xml.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "").contains(getUntranslatedKeywordXML(k3)));
-        assertTrue(xml.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "").contains(getUntranslatedKeywordXML(k4)));
+        assertTrue(xml.contains(MSFD_IMAGE));
+
+        xml = xml.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "");
+
+//        assertTrue(xml.contains("<gmd:graphicOverview><gmd:MD_BrowseGraphic><gmd:fileName><gco:CharacterString>" + MSFD_IMAGE + "</gco:CharacterString></gmd:fileName><gmd:fileDescription><gco:CharacterString>large_thumbnail</gco:CharacterString></gmd:fileDescription><gmd:fileType><gmx:MimeFileTypetype=\"jpg\">jpg</gmx:MimeFileType></gmd:fileType></gmd:MD_BrowseGraphic></gmd:graphicOverview>"));
+        // assertTrue(xml.contains(getUntranslatedKeywordXML(k1)));
+        // assertTrue(xml.contains(getUntranslatedKeywordXML(k3)));
+        // assertTrue(xml.contains(getUntranslatedKeywordXML(k4)));
     }
 
     private void testNoAnchor(IDataset dst) throws IOException, FileNotFoundException, JAXBException {
@@ -365,23 +391,29 @@ public class ISO19115DatasetPrinterTest {
     }
 
     private File innerTestCreateFile(ISO19115DatasetBuilder instance, String fileName) throws IOException, FileNotFoundException, JAXBException {
-        //String getFileName = instance.getFileName();
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(instance, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS);
+        //String getMetadataFileName = instance.getMetadataFileName();
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(instance, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_RBINS), false);
         File file = File.createTempFile(fileName, ".xml");
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Test file stored at " + file.getPath());
-        try {
-            printer.createFile(file, false);
-        } catch (Exception ex) {
-            fail();
-        }
+
+        printer.createFile(file, false);
+
         return file;
     }
 
     private void testTranslatedTitle(IDataset ds) throws JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds, false, true, false, false, null, "Belgian Marine Data Centre");
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         String xml = printer.getResult();
         assertTrue(xml.contains("<gmd:LocalisedCharacterString locale=\"#DE\">Die daten datasets 'Advanced modelling and research on...'</gmd:LocalisedCharacterString>"));
+    }
+
+    private void testAnchorForLaw(IDataset ds) throws JAXBException {
+          ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds, true, true, false, false, null, "Belgian Marine Data Centre");
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
+        String xml = printer.getResult();
+        System.out.println(xml);
+        assertTrue(xml.contains("<gmx:Anchor xlink:href=\"https://eur-lex.europa.eu/eli/reg/2010/1089\">"));
 
     }
 
