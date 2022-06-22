@@ -7,7 +7,6 @@ package be.naturalsciences.bmdc.metadata.model.impl;
 
 import be.naturalsciences.bmdc.metadata.model.FormatEnum;
 import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
-import java.io.Serializable;
 import java.util.Objects;
 
 public class DistributionFormat implements IDistributionFormat {

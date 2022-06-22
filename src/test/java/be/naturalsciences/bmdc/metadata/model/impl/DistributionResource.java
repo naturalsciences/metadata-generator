@@ -15,8 +15,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
-public class DistributionResource implements IDistributionResource,Serializable {
-    
+public class DistributionResource implements IDistributionResource, Serializable {
+
     static final long serialVersionUID = 1L;
 
     private OnlinePossibilityEnum function;
@@ -25,18 +25,19 @@ public class DistributionResource implements IDistributionResource,Serializable 
     //private String onlineResourceName;
 
     private List<IDistributionFormat> distributionFormats;
-    private Double dataSizeInBytes;
+    private Double dataSizeInMegaBytes;
     private IInstituteRole distributor;
     private String onlineResourceIdentifier;
     private String onlineResourceDescriptiveName;
     private String onlineResourceDescription;
+    private String crs;
 
     public DistributionResource(OnlinePossibilityEnum function, URL onlineResourceUrl, ProtocolEnum onlineResourceProtocol, String onlineResourceIdentifier, String onlineResourceDescriptiveName, String onlineResourceDescription, List<IDistributionFormat> distributionFormats, Double dataSizeInBytes, IInstituteRole distributor) {
         this.function = function;
         this.onlineResourceUrl = onlineResourceUrl;
         this.onlineResourceProtocol = onlineResourceProtocol;
         this.distributionFormats = distributionFormats;
-        this.dataSizeInBytes = dataSizeInBytes;
+        this.dataSizeInMegaBytes = dataSizeInBytes;
         this.distributor = distributor;
         this.onlineResourceIdentifier = onlineResourceIdentifier;
         this.onlineResourceDescriptiveName = onlineResourceDescriptiveName;
@@ -103,13 +104,13 @@ public class DistributionResource implements IDistributionResource,Serializable 
     }
 
     @Override
-    public Double getDataSizeInMB() {
-        return dataSizeInBytes;
+    public Double getDataSizeInMegaBytes() {
+        return dataSizeInMegaBytes;
     }
 
     @Override
-    public void setDataSizeInBytes(Double dataSizeInBytes) {
-        this.dataSizeInBytes = dataSizeInBytes;
+    public void setDataSizeInMegaBytes(Double dataSizeInBytes) {
+        this.dataSizeInMegaBytes = dataSizeInBytes;
     }
 
     @Override
@@ -151,6 +152,21 @@ public class DistributionResource implements IDistributionResource,Serializable 
     @Override
     public void setOnlineResourceIdentifier(String onlineResourceIdentifier) {
         this.onlineResourceIdentifier = onlineResourceIdentifier;
+    }
+
+    @Override
+    public boolean isInspire() {
+        return false;
+    }
+
+    @Override
+    public String getCrs() {
+        return this.crs;
+    }
+
+    @Override
+    public void setCrs(String crs) {
+        this.crs = crs;
     }
 
 }

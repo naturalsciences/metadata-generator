@@ -7,7 +7,6 @@ package be.naturalsciences.bmdc.metadata.model.impl;
 
 import be.naturalsciences.bmdc.metadata.model.IDataset;
 import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
-import java.io.Serializable;
 
 public class InstituteRole implements IInstituteRole {
 

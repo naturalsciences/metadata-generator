@@ -93,6 +93,14 @@ public enum FormatEnum {
         public String toString() {
             return "application/vnd.ms-excel";
         }
+    }, HTML {
+        public String toString() {
+            return "text/html";
+        }
+    }, GEOTIFF {
+        public String toString() {
+            return "image/tiff";
+        }
     };
 
 }

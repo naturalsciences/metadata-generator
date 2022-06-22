@@ -6,7 +6,6 @@
 package be.naturalsciences.bmdc.metadata.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  *
@@ -35,21 +34,25 @@ public interface IKeyword extends Serializable {
 
     public String getType();
 
-    public String getThesaurusTitle();
+   /* public String getThesaurusTitle();
 
     public Date getThesaurusPublicationDate();
 
     public String getThesaurusVersion();
 
-    public String getThesaurusUrl();
+    public String getThesaurusUrl();*/
 
     public void setType(String type);
+    
+    public Thesaurus getThesaurus();
+    
+    public void setThesaurus(Thesaurus thesaurus);
 
-    public void setThesaurusTitle(String thesaurusTitle);
+   /* public void setThesaurusTitle(String thesaurusTitle);
 
     public void setThesaurusPublicationDate(Date thesaurusPublicationDate);
 
     public void setThesaurusVersion(String thesaurusVersion);
 
-    public void setThesaurusUrl(String thesaurusUrl);
+    public void setThesaurusUrl(String thesaurusUrl);*/
 }

@@ -14,8 +14,9 @@ import be.naturalsciences.bmdc.metadata.model.IKeyword;
 import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
 import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
 import be.naturalsciences.bmdc.utils.LocalizedString;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -51,6 +52,7 @@ public class Dataset implements IDataset {
     private Set<LocalizedString> multilingualAbstracts;
     private Set<LocalizedString> multilingualTitles;
     private Set<LocalizedString> multilingualLineages;
+    private String browseImageUrl;
 
     public String getIdentifier() {
         return identifier;
@@ -285,12 +287,12 @@ public class Dataset implements IDataset {
     }
 
     @Override
-    public String getFileName() {
+    public String getMetadataFileName() {
         return this.identifier + ".xml";
     }
 
     @Override
-    public String getMetadataUrlXML() {
+    public String getMetadataUrlComputer() {
         return "http://metadata.naturalsciences.be/" + identifier + ".xml";
     }
 
@@ -330,7 +332,108 @@ public class Dataset implements IDataset {
     }
 
     @Override
-    public boolean addDistributionResource(String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats) throws MalformedURLException, URISyntaxException {
+    public boolean addDistributionResource(boolean placeHolder, String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats, IInstituteRole institute, String crs) throws IOException, URISyntaxException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setMetadataFileName(String metadataFileName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setMetadataUrlComputer(String metadataUrlComputer) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setMetadataUrlHuman(String metadataUrlHuman) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getBrowseGraphicUrl() {
+        return browseImageUrl;
+    }
+
+    @Override
+    public void setBrowseGraphicUrl(String browseImageUrl) {
+        this.browseImageUrl = browseImageUrl;
+    }
+
+    @Override
+    public String getTermsUrl() {
+        return null;
+    }
+
+    @Override
+    public void setTermsUrl(String termsUrl) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getAccessLimitations() {
+        return "See the BMDC access policy.";
+    }
+
+    @Override
+    public void setAccessLimitations(String accessLimitations) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getUseConditions() {
+        return "Sensitive occurrences have been excluded.";
+    }
+
+    @Override
+    public void setUseConditions(String useConditions) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getLiability() {
+        return null;
+    }
+
+    @Override
+    public void setLiability(String liability) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getLicenseUrl() {
+        return "https://creativecommons.org/licenses/by/2.0/";
+    }
+
+    @Override
+    public void setLicenseUrl(String licenseUrl) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Map<String, String> getExternaMetadataUrl() {
+        return null;
+    }
+
+    @Override
+    public void setExternaMetadataUrl(Map<String, String> externalDefinitionUrl) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<String> getTopicCategory() {
+        List<String> results=new ArrayList();
+        for (IKeyword kw : this.getKeywords()) {
+            if (kw.getUrl().contains("TopicCategory")) {
+                results.add(kw.getPrefLabel());
+            }
+        }
+        return results;
+    }
+
+    @Override
+    public void setTopicCategory(List<String> topicCategory) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

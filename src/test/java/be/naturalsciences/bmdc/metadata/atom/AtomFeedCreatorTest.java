@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package be.naturalsciences.bmdc.iso;
+package be.naturalsciences.bmdc.metadata.atom;
 
 import be.naturalsciences.bmdc.metadata.atom.AtomFeedDatasetBuilder;
 import be.naturalsciences.bmdc.metadata.iso.ISO19115DatasetPrinterTest;
