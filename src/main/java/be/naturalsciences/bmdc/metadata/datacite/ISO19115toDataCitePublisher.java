@@ -10,18 +10,18 @@ import be.naturalsciences.bmdc.metadata.iso.IsoMetadataModifier;
 import be.naturalsciences.bmdc.utils.JavaUtils;
 import be.naturalsciences.bmdc.utils.StringUtils;
 import be.naturalsciences.bmdc.utils.xml.XMLElement;
-import demo.datacite.mds.account.Account;
-import demo.datacite.metadata.Metadata;
-import demo.http.client.HTTPClient;
-import demo.http.client.HTTPRequest;
-import demo.http.client.HTTPResponse;
+import be.naturalsciences.bmdc.metadata.datacite.mds.account.Account;
+import be.naturalsciences.bmdc.metadata.datacite.metadata.Metadata;
+import be.naturalsciences.bmdc.metadata.datacite.http.client.HTTPClient;
+import be.naturalsciences.bmdc.metadata.datacite.http.client.HTTPRequest;
+import be.naturalsciences.bmdc.metadata.datacite.http.client.HTTPResponse;
 import java.io.File;
 import java.io.IOException;
 import be.naturalsciences.bmdc.utils.xml.XMLUtils;
 import be.naturalsciences.bmdc.utils.xml.XMLUtils.IValidationResult;
-import demo.datacite.mds.doi.PostDOI;
-import demo.datacite.mds.metadata.GetMetadata;
-import demo.datacite.mds.metadata.IPostMetadata;
+import be.naturalsciences.bmdc.metadata.datacite.mds.doi.PostDOI;
+import be.naturalsciences.bmdc.metadata.datacite.mds.metadata.GetMetadata;
+import be.naturalsciences.bmdc.metadata.datacite.mds.metadata.IPostMetadata;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -177,10 +177,7 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
             throw ex;
         }
     }
-    /*private void updateDatasetIdentifier(String xmlISOMetadata) {
-        Pattern pt = Pattern.compile("<gmd:fileIdentifier>[\\n\\r\\s]*<gco:CharacterString>(e2aaecaf-b555-405e-ae77-dfe1b07e0f17)<\\/gco:CharacterString>[\\n\\r\\s]*<\\/gmd:fileIdentifier>");
-        datasetIdentifier = StringUtils.getRegexGroupResults(xmlISOMetadata, pt).get(0);
-    }*/
+
     private void updateDatasetIdentifier() {
         List<String> fileIdentifiers = XMLUtils.xpathQueryString(isoMetadata, "//gmd:fileIdentifier/gco:CharacterString/text()", ISO19115DatasetPrinter.MD_NAMESPACES);
         String fileIdentifier = fileIdentifiers.get(0);
