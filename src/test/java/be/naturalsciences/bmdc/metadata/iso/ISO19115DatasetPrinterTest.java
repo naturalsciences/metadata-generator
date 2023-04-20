@@ -28,7 +28,7 @@ import be.naturalsciences.bmdc.metadata.model.impl.Keyword;
 import be.naturalsciences.bmdc.utils.FileUtils;
 import be.naturalsciences.bmdc.utils.LocalizedString;
 import be.naturalsciences.bmdc.utils.StringUtils;
-import demo.datacite.mds.account.Account;
+import be.naturalsciences.bmdc.metadata.datacite.mds.account.Account;
 import gnu.trove.set.hash.THashSet;
 import java.io.File;
 import java.io.FileNotFoundException;
