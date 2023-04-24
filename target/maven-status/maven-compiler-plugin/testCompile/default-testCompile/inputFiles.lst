@@ -1,5 +1,6 @@
 /Users/thomas/IdeaProjects/metadata-generator/src/test/java/be/naturalsciences/bmdc/metadata/iso/ISO19115DatasetPrinterTest.java
 /Users/thomas/IdeaProjects/metadata-generator/src/test/java/be/naturalsciences/bmdc/metadata/model/impl/InstituteRole.java
+/Users/thomas/IdeaProjects/metadata-generator/src/test/java/be/naturalsciences/bmdc/metadata/datacite/PostIsoMetadataTest.java
 /Users/thomas/IdeaProjects/metadata-generator/src/test/java/be/naturalsciences/bmdc/metadata/model/impl/DistributionFormat.java
 /Users/thomas/IdeaProjects/metadata-generator/src/test/java/be/naturalsciences/bmdc/metadata/model/impl/Distribution.java
 /Users/thomas/IdeaProjects/metadata-generator/src/test/java/be/naturalsciences/bmdc/metadata/model/impl/Datasource.java
