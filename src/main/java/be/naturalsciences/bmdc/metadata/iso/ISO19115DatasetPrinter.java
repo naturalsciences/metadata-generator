@@ -157,7 +157,7 @@ public class ISO19115DatasetPrinter implements Serializable {
      * @param metadata
      * @param keywordLanguages The languages that terms (keywords etc.) need
      * translation to. Provide languages in upper case (EN, DE, FR, NL, ES,IT,
-     * etc.). If provided as null, will resort to the default ((EN, DE, FR, NL).
+     * etc.). If provided as null, will resort to the default (EN, DE, FR, NL).
      * @throws JAXBException
      */
     private ISO19115DatasetPrinter(IDataset dataset, DefaultMetadata metadata, Set<String> keywordLanguages, Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher, boolean inspire) throws JAXBException {
