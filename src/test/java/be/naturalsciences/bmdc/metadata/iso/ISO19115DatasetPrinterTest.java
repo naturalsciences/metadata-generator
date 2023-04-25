@@ -279,22 +279,6 @@ public class ISO19115DatasetPrinterTest {
     }
 
     /**
-     * Test of createFile method, of class ISO19115DatasetPrinter.
-     */
-    @Test
-    @Ignore
-    public void testCreateFile() throws Exception {
-        System.out.println("createFile");
-        File file = new File("/tmp/test-iso.xml");
-        boolean alwaysOverwrite = true;
-        IDataset ds = createFakeDataset2();
-        ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds, false, true, false, false, null, "Belgian Marine Data Centre");
-        innerTestCreateFile(builder, builder.getFileName());
-        // TODO review the generated test code and remove the default call to fail.
-        //fail("The test case is a prototype.");
-    }
-
-    /**
      * Test of equals method, of class ISO19115DatasetPrinter.
      */
     @Test
@@ -364,13 +348,13 @@ public class ISO19115DatasetPrinterTest {
         assertTrue(xml.contains("<gmd:PT_Locale id=\"NL\">"));
         assertTrue(xml.contains("<gmd:PT_Locale id=\"FR\">"));
         assertTrue(xml.contains("Royal Belgian Institute for Natural Sciences, Directorate Natural Environment, Belgian Marine Data Centre (BMDC)"));
-//        assertTrue(xml.contains("<gmd:MD_SpatialRepresentationTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode\" codeListValue=\"textTable\">Text table</gmd:MD_SpatialRepresentationTypeCode>"));
+        // assertTrue(xml.contains("<gmd:MD_SpatialRepresentationTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode\" codeListValue=\"textTable\">Text table</gmd:MD_SpatialRepresentationTypeCode>"));
 
         assertTrue(xml.contains(MSFD_IMAGE));
 
         xml = xml.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "");
 
-//        assertTrue(xml.contains("<gmd:graphicOverview><gmd:MD_BrowseGraphic><gmd:fileName><gco:CharacterString>" + MSFD_IMAGE + "</gco:CharacterString></gmd:fileName><gmd:fileDescription><gco:CharacterString>large_thumbnail</gco:CharacterString></gmd:fileDescription><gmd:fileType><gmx:MimeFileTypetype=\"jpg\">jpg</gmx:MimeFileType></gmd:fileType></gmd:MD_BrowseGraphic></gmd:graphicOverview>"));
+        // assertTrue(xml.contains("<gmd:graphicOverview><gmd:MD_BrowseGraphic><gmd:fileName><gco:CharacterString>" + MSFD_IMAGE + "</gco:CharacterString></gmd:fileName><gmd:fileDescription><gco:CharacterString>large_thumbnail</gco:CharacterString></gmd:fileDescription><gmd:fileType><gmx:MimeFileTypetype=\"jpg\">jpg</gmx:MimeFileType></gmd:fileType></gmd:MD_BrowseGraphic></gmd:graphicOverview>"));
         // assertTrue(xml.contains(getUntranslatedKeywordXML(k1)));
         // assertTrue(xml.contains(getUntranslatedKeywordXML(k3)));
         // assertTrue(xml.contains(getUntranslatedKeywordXML(k4)));
@@ -392,7 +376,7 @@ public class ISO19115DatasetPrinterTest {
 
     private File innerTestCreateFile(ISO19115DatasetBuilder instance, String fileName) throws IOException, FileNotFoundException, JAXBException {
         //String getMetadataFileName = instance.getMetadataFileName();
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(instance, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_RBINS), false);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(instance, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_ACCOUNT), false);
         File file = File.createTempFile(fileName, ".xml");
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Test file stored at " + file.getPath());
 
