@@ -113,7 +113,7 @@ public class ISO19115StringTranslator {
 
     /**
      * *
-     * Translate each occurrence of map key with the map value which. The map
+     * Translate each occurrence of map key with the map value. The map
      * value is a set of languages and translations. It is recommended that the
      * Set maintains insertion order!
      *
