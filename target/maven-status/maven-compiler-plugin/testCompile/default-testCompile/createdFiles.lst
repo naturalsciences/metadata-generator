@@ -1,9 +1,0 @@
-be/naturalsciences/bmdc/metadata/model/impl/DistributionResource.class
-be/naturalsciences/bmdc/metadata/model/impl/Dataset.class
-be/naturalsciences/bmdc/metadata/model/impl/Keyword.class
-be/naturalsciences/bmdc/metadata/model/impl/InstituteRole.class
-be/naturalsciences/bmdc/metadata/model/impl/DistributionFormat.class
-be/naturalsciences/bmdc/metadata/iso/ISO19115DatasetPrinterTest.class
-be/naturalsciences/bmdc/metadata/model/impl/Distribution.class
-be/naturalsciences/bmdc/metadata/model/impl/Datasource.class
-be/naturalsciences/bmdc/metadata/datacite/PostIsoMetadataTest.class
