@@ -36,25 +36,25 @@ public class PostIsoMetadataTest {
             Properties prop = new Properties();
             String account = null;
             String password = null;
-            String handle = null;
+            String prefix = null;
             try {
                 input = ISO19115DatasetBuilder.class.getClassLoader().getResourceAsStream("test.properties");
                 prop.load(input);
                 account = prop.getProperty("datacite.account");
                 password =  prop.getProperty("datacite.password");
-                handle = prop.getProperty("datacite.handle");
+                prefix = prop.getProperty("datacite.prefix");
             } catch (IOException ex) {
-               throw ex;
+                ex.printStackTrace();
             } finally {
                 if (input != null) {
                     try {
                         input.close();
                     } catch (IOException ex) {
-                       throw ex;
+                        ex.printStackTrace();
                     }
                 }
             }
-            return new Account(account, password, handle);
+            return new Account(account, password, prefix);
     }
 
     public static final Account TEST_ACCOUNT = getAccount();
