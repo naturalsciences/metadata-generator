@@ -38,19 +38,19 @@ public class PostIsoMetadataTest {
             String password = null;
             String handle = null;
             try {
-                input = ISO19115DatasetBuilder.class.getClassLoader().getResourceAsStream("config.properties");
+                input = ISO19115DatasetBuilder.class.getClassLoader().getResourceAsStream("test.properties");
                 prop.load(input);
                 account = prop.getProperty("datacite.account");
                 password =  prop.getProperty("datacite.password");
                 handle = prop.getProperty("datacite.handle");
             } catch (IOException ex) {
-                ex.printStackTrace();
+               throw ex;
             } finally {
                 if (input != null) {
                     try {
                         input.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } catch (IOException ex) {
+                       throw ex;
                     }
                 }
             }
