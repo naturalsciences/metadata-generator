@@ -125,6 +125,8 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
     private void updateDCMetadata() throws InvalidMetadataException {
         try {
             String dcMd = XMLUtils.xsltTransform(getXsltDocument(), getISOMetadata(), 2, false); //the GeoNetwork xslt requires version 2!; the simple one works with version 1
+            //System.out.println(account);
+            System.out.println(account.getPrefix());
             dcMd = dcMd.replaceAll("doiPrefixPlaceholder", account.getPrefix());
             this.xmlDCMetadata = dcMd;
             IValidationResult result = XMLUtils.validateXMLAgainstXSD(DATACITE_4_XSD, dcMd);
