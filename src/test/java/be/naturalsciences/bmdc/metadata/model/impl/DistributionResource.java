@@ -22,7 +22,7 @@ public class DistributionResource implements IDistributionResource, Serializable
     private OnlinePossibilityEnum function;
     private URL onlineResourceUrl;
     private ProtocolEnum onlineResourceProtocol;
-    //private String onlineResourceName;
+    // private String onlineResourceName;
 
     private List<IDistributionFormat> distributionFormats;
     private Double dataSizeInMegaBytes;
@@ -31,8 +31,12 @@ public class DistributionResource implements IDistributionResource, Serializable
     private String onlineResourceDescriptiveName;
     private String onlineResourceDescription;
     private String crs;
+    private String onlineResourceName;
 
-    public DistributionResource(OnlinePossibilityEnum function, URL onlineResourceUrl, ProtocolEnum onlineResourceProtocol, String onlineResourceIdentifier, String onlineResourceDescriptiveName, String onlineResourceDescription, List<IDistributionFormat> distributionFormats, Double dataSizeInBytes, IInstituteRole distributor) {
+    public DistributionResource(OnlinePossibilityEnum function, URL onlineResourceUrl,
+            ProtocolEnum onlineResourceProtocol, String onlineResourceIdentifier, String onlineResourceDescriptiveName,
+            String onlineResourceDescription, List<IDistributionFormat> distributionFormats, Double dataSizeInBytes,
+            IInstituteRole distributor) {
         this.function = function;
         this.onlineResourceUrl = onlineResourceUrl;
         this.onlineResourceProtocol = onlineResourceProtocol;
@@ -84,16 +88,6 @@ public class DistributionResource implements IDistributionResource, Serializable
     }
 
     @Override
-    public String getOnlineResourceDescriptiveName() {
-        return onlineResourceDescriptiveName;
-    }
-
-    @Override
-    public void setOnlineResourceDescriptiveName(String onlineResourceDescriptiveName) {
-        this.onlineResourceDescriptiveName = onlineResourceDescriptiveName;
-    }
-
-    @Override
     public List<IDistributionFormat> getDistributionFormats() {
         return distributionFormats;
     }
@@ -133,7 +127,8 @@ public class DistributionResource implements IDistributionResource, Serializable
             return false;
         }
         DistributionResource other = (DistributionResource) object;
-        return this.getOnlineResourceUrl().equals(other.getOnlineResourceUrl()) && this.getOnlineResourceProtocol().equals(other.getOnlineResourceProtocol());
+        return this.getOnlineResourceUrl().equals(other.getOnlineResourceUrl())
+                && this.getOnlineResourceProtocol().equals(other.getOnlineResourceProtocol());
     }
 
     @Override
@@ -167,6 +162,16 @@ public class DistributionResource implements IDistributionResource, Serializable
     @Override
     public void setCrs(String crs) {
         this.crs = crs;
+    }
+
+    @Override
+    public String getOnlineResourceName() {
+        return this.onlineResourceName;
+    }
+
+    @Override
+    public void setOnlineResourceName(String onlineResourceName) {
+        this.onlineResourceName = onlineResourceName;
     }
 
 }

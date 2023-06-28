@@ -29,6 +29,8 @@ import org.xml.sax.SAXException;
  */
 public class ISO19115StringTranslator {
 
+    public static final Logger LOG =  Logger.getLogger(ISO19115StringTranslator.class.getName());
+
     private static final Map<String, String> LOCALE_MAP;
 
     static {
@@ -77,20 +79,21 @@ public class ISO19115StringTranslator {
 
     public final void setDocument(Document document) {
         this.document = document;
-        translatedLanguages = new LinkedHashSet<>(); //start the translated languages anew, and maintain insertion order
+        translatedLanguages = new LinkedHashSet<>(); // start the translated languages anew, and maintain insertion
+                                                     // order
     }
 
     public final void setDocument(String document) {
         try {
             setDocument(XMLUtils.toDocument(document));
         } catch (JAXBException ex) {
-            Logger.getLogger(ISO19115StringTranslator.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (ParserConfigurationException ex) {
-            Logger.getLogger(ISO19115StringTranslator.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (SAXException ex) {
-            Logger.getLogger(ISO19115StringTranslator.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(ISO19115StringTranslator.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 
@@ -103,9 +106,10 @@ public class ISO19115StringTranslator {
             for (String translatedLanguage : getTranslatedLanguages()) {
                 XMLElement element = new XMLElement("gmd:metadataStandardVersion", null, null, null);
                 try {
-                    XMLUtils.pasteAfter(document, element.toXPath(), LOCALE_MAP.get(translatedLanguage), ISO19115DatasetPrinter.MD_NAMESPACES);
+                    XMLUtils.pasteAfter(document, element.toXPath(), LOCALE_MAP.get(translatedLanguage),
+                            ISO19115DatasetPrinter.MD_NAMESPACES);
                 } catch (Exception ex) {
-                    Logger.getLogger(ISO19115StringTranslator.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -117,11 +121,13 @@ public class ISO19115StringTranslator {
      * value is a set of languages and translations. It is recommended that the
      * Set maintains insertion order!
      *
-     * @param XMLText The XML String (whole string) that needs some elements
-     * translated
+     * @param XMLText            The XML String (whole string) that needs some
+     *                           elements
+     *                           translated
      * @param patternToTranslate A pattern completely identifying an element to
-     * be translated be translated (no wildcards and with ONE capturing group)
-     * @param translations A set of translations for each language
+     *                           be translated be translated (no wildcards and with
+     *                           ONE capturing group)
+     * @param translations       A set of translations for each language
      * @return
      */
     public void translate(Map<String, Set<LocalizedString>> translationString) {
@@ -135,32 +141,41 @@ public class ISO19115StringTranslator {
                     element = new XMLElement("gmx:Anchor", searchFor, null, null);
                     translate(element, translations);
                 } else {
-                    //if we have an empty element that has translations, this would mean every single string needs to be translated.
+                    // if we have an empty element that has translations, this would mean every
+                    // single string needs to be translated.
                 }
             }
         }
     }
 
     public void translate(XMLElement element, Set<LocalizedString> translations) {
-        if (element != null && translations != null && !translations.isEmpty()) {//were any elements or translations provided?
+        if (element != null && translations != null && !translations.isEmpty()) {// were any elements or translations
+                                                                                 // provided?
             try {
-                List<Node> nodes = XMLUtils.xpathQueryNodes(document, element.toXPath(), ISO19115DatasetPrinter.MD_NAMESPACES); //is the element even present in the document??
+                List<Node> nodes = XMLUtils.xpathQueryNodes(document, element.toXPath(),
+                        ISO19115DatasetPrinter.MD_NAMESPACES); // is the element even present in the document??
                 if (nodes != null && !nodes.isEmpty()) {
-                    StringBuilder freeTextBuilder = new StringBuilder("<gmd:PT_FreeText xmlns:gmd=\"http://www.isotc211.org/2005/gmd\">"); //the namespace is needed!
+                    StringBuilder freeTextBuilder = new StringBuilder(
+                            "<gmd:PT_FreeText xmlns:gmd=\"http://www.isotc211.org/2005/gmd\">"); // the namespace is
+                                                                                                 // needed!
                     for (LocalizedString localizedString : translations) {
                         String language = localizedString.getLanguageString().toUpperCase();
                         String translation = XMLUtils.replaceXMLTextNode(localizedString.getUnderlyingString());
                         if (translation != null) {
                             translatedLanguages.add(language);
-                            freeTextBuilder.append("<gmd:textGroup><gmd:LocalisedCharacterString locale=\"#").append(language).append("\">").append(translation).append("</gmd:LocalisedCharacterString></gmd:textGroup>");
+                            freeTextBuilder.append("<gmd:textGroup><gmd:LocalisedCharacterString locale=\"#")
+                                    .append(language).append("\">").append(translation)
+                                    .append("</gmd:LocalisedCharacterString></gmd:textGroup>");
                         }
                     }
                     freeTextBuilder.append("</gmd:PT_FreeText>");
-                    XMLUtils.pasteAfter(document, nodes, freeTextBuilder.toString(), ISO19115DatasetPrinter.MD_NAMESPACES);
-                    XMLUtils.appendAttribute(document, element.toXPath() + "/parent::*", "xsi", "type", "gmd:PT_FreeText_PropertyType", ISO19115DatasetPrinter.MD_NAMESPACES);
+                    XMLUtils.pasteAfter(document, nodes, freeTextBuilder.toString(),
+                            ISO19115DatasetPrinter.MD_NAMESPACES);
+                    XMLUtils.appendAttribute(document, element.toXPath() + "/parent::*", "xsi", "type",
+                            "gmd:PT_FreeText_PropertyType", ISO19115DatasetPrinter.MD_NAMESPACES);
                 }
             } catch (Exception ex) {
-                Logger.getLogger(ISO19115StringTranslator.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         }
     }

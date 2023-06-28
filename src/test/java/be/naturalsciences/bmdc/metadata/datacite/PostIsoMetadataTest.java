@@ -32,29 +32,29 @@ import static org.junit.Assert.*;
 public class PostIsoMetadataTest {
 
     private static Account getAccount() {
-            InputStream input = null;
-            Properties prop = new Properties();
-            String account = null;
-            String password = null;
-            String prefix = null;
-            try {
-                input = ISO19115DatasetBuilder.class.getClassLoader().getResourceAsStream("test.properties");
-                prop.load(input);
-                account = prop.getProperty("datacite.account");
-                password =  prop.getProperty("datacite.password");
-                prefix = prop.getProperty("datacite.prefix");
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            } finally {
-                if (input != null) {
-                    try {
-                        input.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
+        InputStream input = null;
+        Properties prop = new Properties();
+        String account = null;
+        String password = null;
+        String prefix = null;
+        try {
+            input = ISO19115DatasetBuilder.class.getClassLoader().getResourceAsStream("test.properties");
+            prop.load(input);
+            account = prop.getProperty("datacite.account");
+            password = prop.getProperty("datacite.password");
+            prefix = prop.getProperty("datacite.prefix");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
             }
-            return new Account(account, password, prefix);
+        }
+        return new Account(account, password, prefix);
     }
 
     public static final Account TEST_ACCOUNT = getAccount();
@@ -89,32 +89,37 @@ public class PostIsoMetadataTest {
      * Test of execute method, of class ISO19115toDataCitePublisher.
      */
     @Test
-    public void testExecute() throws Exception {
-        System.out.println("execute");
-        innerTestExecute(testFile1, "e2aaecaf-b555-405e-ae77-dfe1b07e0f17");
-        innerTestExecute(testFile2, "bmdc.be:dataset:1022"); //will fail as there are no authors!
+    public void testRequestDoi() throws Exception {
+        innerTestRequestDoi(testFile1, "e2aaecaf-b555-405e-ae77-dfe1b07e0f17", false);
+        innerTestRequestDoi(testFile2, "bmdc.be:dataset:1022", true); // must fail as there are no authors!
     }
 
-    private void innerTestExecute(File testFile, String id) throws Exception {
+    private void innerTestRequestDoi(File testFile, String id, boolean shouldFail) throws Exception {
+        int postCode = shouldFail == false ? 201 : 404;
+        int getCode = shouldFail == false ? 200 : 404;
         try {
-            ISO19115toDataCitePublisher post = new ISO19115toDataCitePublisher(TEST_ACCOUNT);
-            post.setIsoMetadata(testFile);
-            HTTPResponse postResult = post.execute();
-            System.out.println(post.getDCMetadata());
-            System.out.println(postResult);
-            String prefix= TEST_ACCOUNT.getPrefix();
-            //TODO: Not testable FTTB, account suspended. assertTrue(postResult.toString().contains(String.format("OK (%s/%S)",prefix,id)));
-            GetMetadata getMetadata = new GetMetadata(TEST_ACCOUNT, String.format("%s/%s",prefix,id));
-            HTTPResponse getResult = getMetadata.execute();
+            ISO19115toDataCitePublisher publisher = new ISO19115toDataCitePublisher(TEST_ACCOUNT);
+            publisher.setIsoMetadata(testFile);
+            HTTPResponse creationResponse = publisher.execute();
+            System.out.println(publisher.getDCMetadata());
+            System.out.println(creationResponse);
+            assertEquals(postCode, creationResponse.getResponseCode()); // 201/404
+            String prefix = TEST_ACCOUNT.getPrefix().toUpperCase();
+            assertTrue(creationResponse.toString().contains(String.format("OK (%s/%S)", prefix, id)));
+            GetMetadata getMetadata = new GetMetadata(TEST_ACCOUNT, String.format("%s/%s", prefix, id));
+            HTTPResponse metadataResponse = getMetadata.execute();
 
-            //TODO: Not testable FTTB, account suspended. assertTrue(getResult.toString().contains(String.format("<datacite:identifier identifierType=\"DOI\">%s/%s</datacite:identifier>",prefix,id)));
-            post.updateOriginalMetadata();
-            String isoMetadata = post.getISOMetadata();
-            assertTrue(isoMetadata.contains(String.format("<gmx:Anchor xlink:href=\"https://doi.org/%s/%s\">%s/%s</gmx:Anchor>",prefix,id,prefix,id)));
+            assertTrue(metadataResponse.toString().contains(String
+                    .format("<datacite:identifier identifierType=\"DOI\">%s/%s</datacite:identifier>", prefix, id)));
+            publisher.updateOriginalMetadata();
+            String isoMetadata = publisher.getISOMetadata();
+            assertTrue(isoMetadata.contains(String.format(
+                    "<gmx:Anchor xlink:href=\"https://doi.org/%s/%s\">%s/%s</gmx:Anchor>", prefix, id, prefix, id)));
 
-            GetDOI getDoi = new GetDOI(TEST_ACCOUNT, String.format("%s/%s",prefix,id));
-            HTTPResponse execute = getDoi.execute();
-            //TODO: Not testable FTTB, account suspended. assertTrue(execute.toString().contains("http://metadata.naturalsciences.be/" + id));
+            GetDOI getDoi = new GetDOI(TEST_ACCOUNT, String.format("%s/%s", prefix, id));
+            HTTPResponse doiResponse = getDoi.execute();
+            assertEquals(getCode, doiResponse.getResponseCode()); // 200/404
+            assertTrue(doiResponse.toString().contains("http://metadata.naturalsciences.be/" + id));
         } catch (InvalidMetadataException ex) {
             Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.INFO, ex.getMessage());
         }

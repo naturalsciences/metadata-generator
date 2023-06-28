@@ -54,6 +54,8 @@ import org.xml.sax.SAXException;
  */
 public class ISO19115DatasetPrinter implements Serializable {
 
+    public static final Logger LOG = Logger.getLogger(ISO19115DatasetPrinter.class.getName());
+
     private IDataset dataset;
     private StringBuilder datasetText;
     private Set<String> keywordLanguages;
@@ -80,18 +82,21 @@ public class ISO19115DatasetPrinter implements Serializable {
     public static final Map<String, String> ATOM_NAMESPACES = new HashMap<>();
 
     private static Map<String, Document> GEMET_FILTERED_RESULTS = new HashMap();
-    private static Map<String, Set<LocalizedString>> ANCHOR_TRANSLATIONS_MAP = new LinkedHashMap<>(); //maintain insertion order!
+    private static Map<String, Set<LocalizedString>> ANCHOR_TRANSLATIONS_MAP = new LinkedHashMap<>(); // maintain
+                                                                                                      // insertion
+                                                                                                      // order!
 
     static {
         String tmp = System.getProperty("java.io.tmpdir");
         INSPIRE_RDF_DIR = new File(tmp, "inspire-rdf");
 
         try {
-            FileUtils.copyURLToFile(new URL("https://www.eionet.europa.eu/gemet/latest/gemet.rdf.gz"), new File(INSPIRE_RDF_DIR, "gemet.rdf.gz"), CONNECTION_TIME_OUT, READ_TIME_OUT);
+            FileUtils.copyURLToFile(new URL("https://www.eionet.europa.eu/gemet/latest/gemet.rdf.gz"),
+                    new File(INSPIRE_RDF_DIR, "gemet.rdf.gz"), CONNECTION_TIME_OUT, READ_TIME_OUT);
             FileUtils.decompressGzipFile(new File(INSPIRE_RDF_DIR, "gemet.rdf.gz"), INSPIRE_RDF_DIR);
             GEMET_DOCUMENT = XMLUtils.toDocument(new File(INSPIRE_RDF_DIR, "gemet.rdf"));
         } catch (Exception ex) {
-            Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.SEVERE, "An exception occured.", ex);
+            LOG.log(Level.SEVERE, "An exception occured.", ex);
         }
 
         CSW_NAMESPACES.put("csw", "http://www.opengis.net/cat/csw/2.0.2");
@@ -146,8 +151,11 @@ public class ISO19115DatasetPrinter implements Serializable {
         return datacitePublisher;
     }
 
-    public ISO19115DatasetPrinter(ISO19115DatasetBuilder builder, Set<String> keywordLanguages, Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher, boolean inspire) throws JAXBException {
-        this(builder.getDataset(), builder.getMetadataDocument(), keywordLanguages, extraTranslations, datacitePublisher, inspire);
+    public ISO19115DatasetPrinter(ISO19115DatasetBuilder builder, Set<String> keywordLanguages,
+            Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher,
+            boolean inspire) throws JAXBException {
+        this(builder.getDataset(), builder.getMetadataDocument(), keywordLanguages, extraTranslations,
+                datacitePublisher, inspire);
         this.builder = builder;
         cleanupResult();
     }
@@ -156,11 +164,15 @@ public class ISO19115DatasetPrinter implements Serializable {
      * @param dataset
      * @param metadata
      * @param keywordLanguages The languages that terms (keywords etc.) need
-     * translation to. Provide languages in upper case (EN, DE, FR, NL, ES,IT,
-     * etc.). If provided as null, will resort to the default (EN, DE, FR, NL).
+     *                         translation to. Provide languages in upper case (EN,
+     *                         DE, FR, NL, ES,IT,
+     *                         etc.). If provided as null, will resort to the
+     *                         default (EN, DE, FR, NL).
      * @throws JAXBException
      */
-    private ISO19115DatasetPrinter(IDataset dataset, DefaultMetadata metadata, Set<String> keywordLanguages, Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher, boolean inspire) throws JAXBException {
+    private ISO19115DatasetPrinter(IDataset dataset, DefaultMetadata metadata, Set<String> keywordLanguages,
+            Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher,
+            boolean inspire) throws JAXBException {
         if (dataset == null) {
             throw new IllegalArgumentException("Provided dataset argument is null.");
         }
@@ -174,52 +186,58 @@ public class ISO19115DatasetPrinter implements Serializable {
             try {
                 Files.createDirectories(INSPIRE_RDF_DIR.toPath());
             } catch (IOException e) {
-                Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.SEVERE, "Couldn't create directory.", e);
+                LOG.log(Level.SEVERE, "Couldn't create directory.",
+                        e);
             }
         }
         URL themeRdfUrl = null;
 
         for (String keywordLanguage : getKeywordLanguages()) {
-            if (INSPIRE_VOCABULARY.get(keywordLanguage) == null) { //if it's not yet downloaded
+            if (INSPIRE_VOCABULARY.get(keywordLanguage) == null) { // if it's not yet downloaded
                 String fileName = "theme." + keywordLanguage.toLowerCase() + ".rdf";
                 try {
                     themeRdfUrl = new URL("https://inspire.ec.europa.eu/theme/" + fileName);
                 } catch (MalformedURLException ex) {
-                    Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex); //won't happen
+                    LOG.log(Level.SEVERE, null, ex); // won't
+                                                                                                          // happen
                 }
                 File file = new File(INSPIRE_RDF_DIR, fileName);
                 try {
                     FileUtils.copyURLToFile(themeRdfUrl, file, CONNECTION_TIME_OUT, READ_TIME_OUT);
-                    Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Downloaded " + themeRdfUrl);
-                } catch (IOException ex) {//i.e. the theme file couldn't be downloaded, re-use the local one
-                    Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.SEVERE, "An exception occured while trying to download " + themeRdfUrl + ".", ex);
-                    if (file.isFile()) { //if it's there already and it's a file
+                    LOG.log(Level.INFO,
+                            "Downloaded " + themeRdfUrl);
+                } catch (IOException ex) {// i.e. the theme file couldn't be downloaded, re-use the local one
+                    LOG.log(Level.SEVERE,
+                            "An exception occured while trying to download " + themeRdfUrl + ".", ex);
+                    if (file.isFile()) { // if it's there already and it's a file
                         try {
                             INSPIRE_VOCABULARY.put(keywordLanguage, XMLUtils.toDocument(file));
                         } catch (Exception ex1) {
-                            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex1);
+                            LOG.log(Level.SEVERE, null, ex1);
                         }
                     }
                 }
 
                 try {
-                    if (file.isFile() && Files.size(file.toPath()) > 0) { //if it's there already and it's a file
+                    if (file.isFile() && Files.size(file.toPath()) > 0) { // if it's there already and it's a file
                         INSPIRE_VOCABULARY.put(keywordLanguage, XMLUtils.toDocument(file));
                     } else {
                         throw new Exception("The file " + file.getName() + " is not existing or empty.");
                     }
                 } catch (Exception ex1) {
-                    Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex1);
+                    LOG.log(Level.SEVERE, null, ex1);
                 }
             }
         }
         this.dataset = dataset;
 
         long startTime = System.currentTimeMillis();
-        Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.INFO, "Marshalling XML for dataset " + dataset.getIdentifier());
+        LOG.log(Level.INFO,
+                "Marshalling XML for dataset " + dataset.getIdentifier() + "...");
         String xml = XML.marshal(metadata);
         long endTime = System.currentTimeMillis();
-        Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.INFO, "Marshalling XML took " + (endTime - startTime) + " milliseconds");
+        LOG.log(Level.INFO,
+                "Marshalling took " + (endTime - startTime) + " milliseconds");
         this.datasetText = new StringBuilder(xml);
         this.translator = new ISO19115StringTranslator();
         this.extraTranslations = extraTranslations;
@@ -253,7 +271,8 @@ public class ISO19115DatasetPrinter implements Serializable {
             try {
                 input = ISO19115DatasetBuilder.class.getClassLoader().getResourceAsStream("config.properties");
                 prop.load(input);
-                keywordLanguages = new HashSet<String>(Arrays.asList(prop.getProperty("metadata.iso.inspire.keyword.languages").toUpperCase().split(",")));
+                keywordLanguages = new HashSet<String>(Arrays
+                        .asList(prop.getProperty("metadata.iso.inspire.keyword.languages").toUpperCase().split(",")));
 
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -284,64 +303,93 @@ public class ISO19115DatasetPrinter implements Serializable {
      * sols</gmd:LocalisedCharacterString>
      * </gmd:textGroup>
      * <gmd:textGroup>
-     * <gmd:LocalisedCharacterString locale="#NL">Landgebruik</gmd:LocalisedCharacterString>
+     * <gmd:LocalisedCharacterString locale=
+     * "#NL">Landgebruik</gmd:LocalisedCharacterString>
      * </gmd:textGroup>
      * <gmd:textGroup>
-     * <gmd:LocalisedCharacterString locale="#DE">Bodennutzung</gmd:LocalisedCharacterString>
+     * <gmd:LocalisedCharacterString locale=
+     * "#DE">Bodennutzung</gmd:LocalisedCharacterString>
      * </gmd:textGroup>
      * </gmd:PT_FreeText>
      *
      * @param XMLText
      * @param languages The languages that terms (keywords etc.) need
-     * translation to. Provide languages in upper case (EN, DE, FR, NL, ES,IT,
-     * etc.). If provided as null, will resort to the default ((EN, DE, FR, NL).
+     *                  translation to. Provide languages in upper case (EN, DE, FR,
+     *                  NL, ES,IT,
+     *                  etc.). If provided as null, will resort to the default ((EN,
+     *                  DE, FR, NL).
      * @return
      * @throws IOException
      */
     private void processAnchorTranslations() {
         String xml = datasetText.toString();
         if (xml.contains("gmx:Anchor")) {
-            List<List<String>> urlMatches = StringUtils.getRegexResultFromMultilineString(xml, Pattern.compile("<gmx:Anchor xlink:href=\"(.*?)\">"), null);
+            List<List<String>> urlMatches = StringUtils.getRegexResultFromMultilineString(xml,
+                    Pattern.compile("<gmx:Anchor xlink:href=\"(.*?)\">"), null);
             if (!urlMatches.isEmpty()) {
                 List<String> urlMatches2 = StringUtils.flattenListOfLists(urlMatches);
                 Set<String> urlMatches3 = new HashSet(urlMatches2);
                 if (!urlMatches3.isEmpty()) {
                     for (String urlMatch : urlMatches3) {
                         try {
-                            if (urlMatch.contains("gemet/concept/")) { //instead of later do an xpath looking in the whole file for each different language, just look in the fragments of it that matter.
+                            if (urlMatch.contains("gemet/concept/")) { // instead of later do an xpath looking in the
+                                                                       // whole file for each different language, just
+                                                                       // look in the fragments of it that matter.
                                 if (!GEMET_FILTERED_RESULTS.containsKey(urlMatch)) {
-                                    String xmlForResult = XMLUtils.xpathQueryNodeXML(GEMET_DOCUMENT, "/rdf:RDF/rdf:Description[@rdf:about='" + urlMatch.replace("http://www.eionet.europa.eu/gemet/", "").replaceAll("/$", "") + "']", RDF_NAMESPACES);
+                                    String xmlForResult = XMLUtils.xpathQueryNodeXML(GEMET_DOCUMENT,
+                                            "/rdf:RDF/rdf:Description[@rdf:about='"
+                                                    + urlMatch.replace("http://www.eionet.europa.eu/gemet/", "")
+                                                            .replaceAll("/$", "")
+                                                    + "']",
+                                            RDF_NAMESPACES);
                                     if (xmlForResult != null) {
                                         GEMET_FILTERED_RESULTS.put(urlMatch, XMLUtils.toDocument(xmlForResult));
                                     }
                                 }
                             }
-                            if (ANCHOR_TRANSLATIONS_MAP.get(urlMatch) == null || ANCHOR_TRANSLATIONS_MAP.get(urlMatch).isEmpty()) {
+                            if (ANCHOR_TRANSLATIONS_MAP.get(urlMatch) == null
+                                    || ANCHOR_TRANSLATIONS_MAP.get(urlMatch).isEmpty()) {
                                 for (String language : getKeywordLanguages()) {
-                                    if (urlMatch.contains("inspire.ec.europa.eu/theme/")) {//INSPIRE Themes
+                                    if (urlMatch.contains("inspire.ec.europa.eu/theme/")) {// INSPIRE Themes
                                         Document gemetInspireDocument = INSPIRE_VOCABULARY.get(language);
-                                        List<String> translations = XMLUtils.xpathQueryString(gemetInspireDocument, "/rdf:RDF/rdf:Description[@rdf:about='" + urlMatch + "']/dct:title/text()", RDF_NAMESPACES);
+                                        List<String> translations = XMLUtils.xpathQueryString(gemetInspireDocument,
+                                                "/rdf:RDF/rdf:Description[@rdf:about='" + urlMatch
+                                                        + "']/dct:title/text()",
+                                                RDF_NAMESPACES);
                                         if (translations != null && !translations.isEmpty()) {
-                                            Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Looking up " + urlMatch + " in " + language + " in INSPIRE theme vocab.");
-                                            CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch, new LocalizedString(translations.get(0), LANGUAGES.get(language).get(0)));
+                                            LOG.log(Level.INFO,
+                                                    "Looking up " + urlMatch + " in " + language
+                                                            + " in INSPIRE theme vocab.");
+                                            CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch,
+                                                    new LocalizedString(translations.get(0),
+                                                            LANGUAGES.get(language).get(0)));
                                         }
-                                    } else if (urlMatch.contains("gemet/concept/")) {//GEMET themes
-                                        String xPath = "/rdf:Description/skos:prefLabel[@xml:lang='" + language.toLowerCase() + "']/text()";
-                                        List<String> translations = XMLUtils.xpathQueryString(GEMET_FILTERED_RESULTS.get(urlMatch), xPath, RDF_NAMESPACES);
+                                    } else if (urlMatch.contains("gemet/concept/")) {// GEMET themes
+                                        String xPath = "/rdf:Description/skos:prefLabel[@xml:lang='"
+                                                + language.toLowerCase() + "']/text()";
+                                        List<String> translations = XMLUtils.xpathQueryString(
+                                                GEMET_FILTERED_RESULTS.get(urlMatch), xPath, RDF_NAMESPACES);
                                         if (translations != null && !translations.isEmpty()) {
-                                            Logger.getLogger(ISO19115DatasetBuilder.class.getName()).log(Level.INFO, "Looking up " + urlMatch + " in " + language + " in GEMET theme vocab.");
-                                            CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch, new LocalizedString(translations.get(0), LANGUAGES.get(language).get(0)));
+                                            LOG.log(Level.INFO,
+                                                    "Looking up " + urlMatch + " in " + language
+                                                            + " in GEMET theme vocab.");
+                                            CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch,
+                                                    new LocalizedString(translations.get(0),
+                                                            LANGUAGES.get(language).get(0)));
                                         }
 
                                     }
                                 }
                             }
                         } catch (Exception ex) {
-                            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, "An exception occured. " + urlMatch + " could not be reached.", ex);
+                            LOG.log(Level.SEVERE,
+                                    "An exception occured. " + urlMatch + " could not be reached.", ex);
                         }
 
-                        if (ANCHOR_TRANSLATIONS_MAP.get(urlMatch) != null && !ANCHOR_TRANSLATIONS_MAP.get(urlMatch).isEmpty()) {
-                            translator.translate(new XMLElement("gmx:Anchor", null, "xlink:href", urlMatch), ANCHOR_TRANSLATIONS_MAP.get(urlMatch));
+                        if (ANCHOR_TRANSLATIONS_MAP.get(urlMatch) != null
+                                && !ANCHOR_TRANSLATIONS_MAP.get(urlMatch).isEmpty()) {
+                            translator.translate(new XMLElement("gmx:Anchor", null, "xlink:href", urlMatch),
+                                    ANCHOR_TRANSLATIONS_MAP.get(urlMatch));
                         }
                     }
                 }
@@ -360,9 +408,11 @@ public class ISO19115DatasetPrinter implements Serializable {
         Date start = dataset.getStartDate();
         Date end = dataset.getEndDate();
 
-        //replaceAll("\n", " "); //flatten everything!
-        /*replaceAll("\t", " ");
-        replaceAll("> *<", "><");*/
+        // replaceAll("\n", " "); //flatten everything!
+        /*
+         * replaceAll("\t", " ");
+         * replaceAll("> *<", "><");
+         */
         String temporalInfo = null;
         if (start != null) {
             SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -394,20 +444,25 @@ public class ISO19115DatasetPrinter implements Serializable {
                 + "                 xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/iso/19139/20070417/gmd/gmd.xsd http://www.isotc211.org/2005/gmx http://schemas.opengis.net/iso/19139/20070417/gmx/gmx.xsd\">";
 
         replaceAll("<gmd:MD_Metadata(.|\\n)*?>", header);
-        replace("<gco:CharacterString>ISO 19115-1:2014(E)</gco:CharacterString>", "<gco:CharacterString>ISO 19115:2003/19139</gco:CharacterString>");
-        replace("<gco:CharacterString>Geographic Information — Metadata Part 1: Fundamentals</gco:CharacterString>", "<gco:CharacterString>Geographic information -- Metadata</gco:CharacterString>");
+        replace("<gco:CharacterString>ISO 19115-1:2014(E)</gco:CharacterString>",
+                "<gco:CharacterString>ISO 19115:2003/19139</gco:CharacterString>");
+        replace("<gco:CharacterString>Geographic Information — Metadata Part 1: Fundamentals</gco:CharacterString>",
+                "<gco:CharacterString>Geographic information -- Metadata</gco:CharacterString>");
         replace(" codeSpace=\"eng\"", "");
         replace("codeListValue=\"nld\">nld", "codeListValue=\"dut\">Dutch");
         replace("codeListValue=\"fra\"", "codeListValue=\"fre\"");
-        replace("codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#LanguageCode\"", "codeList=\"http://www.loc.gov/standards/iso639-2/\"");
+        replace("codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#LanguageCode\"",
+                "codeList=\"http://www.loc.gov/standards/iso639-2/\"");
 
-        replace("http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml", "http://standards.iso.org/iso/19139/resources/gmxCodelists.xml");
+        replace("http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml",
+                "http://standards.iso.org/iso/19139/resources/gmxCodelists.xml");
 
-        replace("http://schemas.opengis.net/iso/19139/20070417/resources/uom/gmxUom.xml#xpointer(//*[@gml:id='m'])","http://vocab.nerc.ac.uk/collection/P06/current/ULAA/");
+        replace("http://schemas.opengis.net/iso/19139/20070417/resources/uom/gmxUom.xml#xpointer(//*[@gml:id='m'])",
+                "http://vocab.nerc.ac.uk/collection/P06/current/ULAA/");
         String pattern1 = "<gco:CharacterString>&lt;gmx:Anchor xlink:href=\"(.*?)\"/&gt;</gco:CharacterString>";
         String pattern2 = "<gco:CharacterString>&lt;gmx:Anchor xlink:href=\"(.*?)\"&gt;(.*?)&lt;/gmx:Anchor&gt;</gco:CharacterString>";
-        String pattern3 = "<gmx:FileName src=\"(.*?)\">(.*?)</gmx:FileName>"; //browseGraphic
-        String pattern4 = "<gmx:MimeFileType type=.*?>(.*?)</gmx:MimeFileType>"; //browseGraphic
+        String pattern3 = "<gmx:FileName src=\"(.*?)\">(.*?)</gmx:FileName>"; // browseGraphic
+        String pattern4 = "<gmx:MimeFileType type=.*?>(.*?)</gmx:MimeFileType>"; // browseGraphic
 
         String vautierstraatExpanded = "<exp xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" ><gmd:deliveryPoint >\n"
                 + "<gco:CharacterString>Vautierstraat 29</gco:CharacterString>\n"
@@ -428,10 +483,21 @@ public class ISO19115DatasetPrinter implements Serializable {
         replaceAll(pattern4, "<gco:CharacterString>$1</gco:CharacterString>");
         replaceAll("\n", "");
         if (inspire) {
-            replace("codeListValue=\"publication\">Publication", "codeListValue=\"publication\">publication"); //not liked by the INSPIRE validator
-            replaceAll("<gmd:codeSpace> *<gco:CharacterString>EPSG</gco:CharacterString> *</gmd:codeSpace>", "");  //not liked by the INSPIRE validator
-            replaceAll("<gmd:date> *<gco:DateTime>(.*?)T(.*?)</gco:DateTime> *</gmd:date>", "<gmd:date><gco:Date>$1</gco:Date></gmd:date>"); //not liked by the INSPIRE validator
-            replaceAll("<gco:CharacterString>No limitations on public access.</gco:CharacterString>", "<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">No limitations on public access.</gmx:Anchor>");
+            replace("codeListValue=\"publication\">Publication", "codeListValue=\"publication\">publication"); // not
+                                                                                                               // liked
+                                                                                                               // by the
+                                                                                                               // INSPIRE
+                                                                                                               // validator
+            replaceAll("<gmd:codeSpace> *<gco:CharacterString>EPSG</gco:CharacterString> *</gmd:codeSpace>", ""); // not
+                                                                                                                  // liked
+                                                                                                                  // by
+                                                                                                                  // the
+                                                                                                                  // INSPIRE
+                                                                                                                  // validator
+            replaceAll("<gmd:date> *<gco:DateTime>(.*?)T(.*?)</gco:DateTime> *</gmd:date>",
+                    "<gmd:date><gco:Date>$1</gco:Date></gmd:date>"); // not liked by the INSPIRE validator
+            replaceAll("<gco:CharacterString>No limitations on public access.</gco:CharacterString>",
+                    "<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">No limitations on public access.</gmx:Anchor>");
         }
         long startTime = System.currentTimeMillis();
 
@@ -445,22 +511,27 @@ public class ISO19115DatasetPrinter implements Serializable {
             }
             if (inspire) {
                 String identifierAuthority = builder.getIdentifierAuthority();
-                String xPath = "//gmd:identificationInfo/*/gmd:citation/*/gmd:identifier[*/gmd:authority/*/gmd:title/gco:CharacterString='" + identifierAuthority + "']";
+                String xPath = "//gmd:identificationInfo/*/gmd:citation/*/gmd:identifier[*/gmd:authority/*/gmd:title/gco:CharacterString='"
+                        + identifierAuthority + "']";
                 String mdIdentifier = XMLUtils.xpathQueryNodeXML(document, xPath, MD_NAMESPACES);
                 String rsIdentifier = mdIdentifier.replace("MD_Identifier", "RS_Identifier");
-                rsIdentifier = rsIdentifier.replace("</gmd:code>", "</gmd:code><gmd:codeSpace xmlns:gco=\"http://www.isotc211.org/2005/gco\"><gco:CharacterString>http://metadata.naturalsciences.be</gco:CharacterString></gmd:codeSpace>");
-                XMLUtils.replace(document, xPath, rsIdentifier, MD_NAMESPACES); //It seems a best practice to use the INSPIRE codeSpace.
+                rsIdentifier = rsIdentifier.replace("</gmd:code>",
+                        "</gmd:code><gmd:codeSpace xmlns:gco=\"http://www.isotc211.org/2005/gco\"><gco:CharacterString>http://metadata.naturalsciences.be</gco:CharacterString></gmd:codeSpace>");
+                XMLUtils.replace(document, xPath, rsIdentifier, MD_NAMESPACES); // It seems a best practice to use the
+                                                                                // INSPIRE codeSpace.
             }
-            XMLUtils.replace(document, "//gmd:deliveryPoint[gco:CharacterString[text()=\"Vautierstraat 29, 1000 Brussel, Belgium\"]]", vautierstraatExpanded, MD_NAMESPACES);
+            XMLUtils.replace(document,
+                    "//gmd:deliveryPoint[gco:CharacterString[text()=\"Vautierstraat 29, 1000 Brussel, Belgium\"]]",
+                    vautierstraatExpanded, MD_NAMESPACES);
 
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (ParserConfigurationException ex) {
-            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (SAXException ex) {
-            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         if (xml.contains("gmx:Anchor") || (extraTranslations != null && !extraTranslations.isEmpty())) {
@@ -472,11 +543,14 @@ public class ISO19115DatasetPrinter implements Serializable {
             translator.finalizeTranslations();
             datasetText = new StringBuilder(XMLUtils.toXML(translator.getDocument()));
             long endTime = System.currentTimeMillis();
-            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.INFO, "Translating elements for dataset " + dataset.getIdentifier() + " took " + (endTime - startTime) + " milliseconds");
+            LOG.log(Level.INFO, "Translating elements for dataset "
+                    + dataset.getIdentifier() + " took " + (endTime - startTime) + " milliseconds");
         }
-        //this somehow causes every element to receive a PT_FreeText
-        // System.out.println("DOM JAVA IMPLEMENTATION: " + translator.getDocument().getImplementation());
-        // System.out.println("Should be com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl");
+        // this somehow causes every element to receive a PT_FreeText
+        // System.out.println("DOM JAVA IMPLEMENTATION: " +
+        // translator.getDocument().getImplementation());
+        // System.out.println("Should be
+        // com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl");
 
         if (datacitePublisher != null) {
             try {
@@ -484,7 +558,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                 datacitePublisher.updateOriginalMetadata();
                 datasetText = new StringBuilder(datacitePublisher.getISOMetadata());
             } catch (InvalidMetadataException ex) {
-                Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.INFO, ex.getMessage());
+                LOG.log(Level.INFO, ex.getMessage());
             }
         }
         translator = null;
@@ -505,7 +579,7 @@ public class ISO19115DatasetPrinter implements Serializable {
      * @return
      */
     private boolean resultEquals(String xml1, String xml2) {
-        Map<Pattern, String> repl = new LinkedHashMap(); //maintain insertion order!
+        Map<Pattern, String> repl = new LinkedHashMap(); // maintain insertion order!
         String comp1 = StringUtils.flattenString(xml1);
         String comp2 = StringUtils.flattenString(xml2);
         Pattern dates = Pattern.compile("<gmd:dateStamp><gco:DateTime>.*?<\\/gco:DateTime><\\/gmd:dateStamp>");
@@ -564,7 +638,7 @@ public class ISO19115DatasetPrinter implements Serializable {
      *
      * @param file
      * @param alwaysOverwrite If set to true, will overwrite even if it replaces
-     * an identical file (This ignores gmd:dateStamp)
+     *                        an identical file (This ignores gmd:dateStamp)
      * @return True if the file has been overwritten, false if nothing happened
      * @throws FileNotFoundException
      */
@@ -595,24 +669,28 @@ public class ISO19115DatasetPrinter implements Serializable {
                     String flattenedExistingXml = StringUtils.flattenString(existingXml);
                     String flattenedNewXml = StringUtils.flattenString(newXml);
                     List<String> diffs = StringUtils.findNotMatching(flattenedExistingXml, flattenedNewXml);
-                    message.append(" overwritten because updates where needed. All differences (gml:id and timestamps were ignored):");
+                    message.append(
+                            " overwritten because updates where needed. All differences (gml:id and timestamps were ignored):");
                     message.append("\n");
-                    /*    for (String diff : diffs) {
-                        message.append("----\n");
-                        message.append(diff);
-                        message.append("----\n");
-                    }*/
+                    /*
+                     * for (String diff : diffs) {
+                     * message.append("----\n");
+                     * message.append(diff);
+                     * message.append("----\n");
+                     * }
+                     */
                 }
 
             }
-            try ( PrintWriter out = new PrintWriter(file)) {
+            try (PrintWriter out = new PrintWriter(file)) {
                 out.println(newXml);
             }
 
         } else {
-            message.append(" not overwritten because the new file is identical (except for gml:id and the metadata timestamp)");
+            message.append(
+                    " not overwritten because the new file is identical (except for gml:id and the metadata timestamp)");
         }
-        Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.INFO, message.toString());
+        LOG.log(Level.INFO, message.toString());
         dataset = null;
     }
 

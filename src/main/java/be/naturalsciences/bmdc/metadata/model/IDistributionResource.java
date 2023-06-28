@@ -33,10 +33,6 @@ public interface IDistributionResource extends Serializable {
 
     void setOnlineResourceIdentifier(String onlineResourceIdentifier);
 
-    String getOnlineResourceDescriptiveName();
-
-    void setOnlineResourceDescriptiveName(String onlineResourceDescriptiveName);
-
     String getOnlineResourceDescription();
 
     void setOnlineResourceDescription(String onlineResourceDescription);
@@ -58,5 +54,9 @@ public interface IDistributionResource extends Serializable {
     String getCrs();
 
     void setCrs(String crs);
+
+    public String getOnlineResourceName();
+
+    public void setOnlineResourceName(String onlineResourceName);
 
 }

@@ -124,7 +124,7 @@ public interface IDataset extends Serializable {
 
     public void setDistributionResources(Collection<IDistributionResource> distributionResources);
 
-    public boolean addDistributionResource(boolean placeHolder, String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats, IInstituteRole distributor, String crs) throws IOException, URISyntaxException;
+    //public boolean addDistributionResource(boolean placeHolder, String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats, IInstituteRole distributor, String crs) throws IOException, URISyntaxException;
 
     public void setPointsOfContact(Collection<IInstituteRole> pointsOfContact);
 

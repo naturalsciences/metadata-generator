@@ -331,10 +331,10 @@ public class Dataset implements IDataset {
         this.multilingualLineages = lineages;
     }
 
-    @Override
+/*     @Override
     public boolean addDistributionResource(boolean placeHolder, String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats, IInstituteRole institute, String crs) throws IOException, URISyntaxException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    } */
 
     @Override
     public void setMetadataFileName(String metadataFileName) {
