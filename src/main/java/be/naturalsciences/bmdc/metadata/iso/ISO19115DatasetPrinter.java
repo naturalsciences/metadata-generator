@@ -73,7 +73,7 @@ public class ISO19115DatasetPrinter implements Serializable {
 
     private static final File INSPIRE_RDF_DIR;
 
-    private static Map<String, Document> INSPIRE_VOCABULARY = new HashMap();
+    private static Map<String, Document> INSPIRE_VOCABULARY = new HashMap<>();
 
     public static final Map<String, String> CSW_NAMESPACES = new HashMap<>();
     public static final Map<String, String> GML_NAMESPACES = new HashMap<>();
@@ -81,7 +81,7 @@ public class ISO19115DatasetPrinter implements Serializable {
     public static final Map<String, String> RDF_NAMESPACES = new HashMap<>();
     public static final Map<String, String> ATOM_NAMESPACES = new HashMap<>();
 
-    private static Map<String, Document> GEMET_FILTERED_RESULTS = new HashMap();
+    private static Map<String, Document> GEMET_FILTERED_RESULTS = new HashMap<>();
     private static Map<String, Set<LocalizedString>> ANCHOR_TRANSLATIONS_MAP = new LinkedHashMap<>(); // maintain
                                                                                                       // insertion
                                                                                                       // order!
@@ -328,7 +328,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                     Pattern.compile("<gmx:Anchor xlink:href=\"(.*?)\">"), null);
             if (!urlMatches.isEmpty()) {
                 List<String> urlMatches2 = StringUtils.flattenListOfLists(urlMatches);
-                Set<String> urlMatches3 = new HashSet(urlMatches2);
+                Set<String> urlMatches3 = new HashSet<>(urlMatches2);
                 if (!urlMatches3.isEmpty()) {
                     for (String urlMatch : urlMatches3) {
                         try {
@@ -359,7 +359,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                                         if (translations != null && !translations.isEmpty()) {
                                             LOG.log(Level.INFO,
                                                     "Looking up " + urlMatch + " in " + language
-                                                            + " in INSPIRE theme vocab.");
+                                                            + " in INSPIRE theme vocab...");
                                             CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch,
                                                     new LocalizedString(translations.get(0),
                                                             LANGUAGES.get(language).get(0)));
@@ -372,7 +372,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                                         if (translations != null && !translations.isEmpty()) {
                                             LOG.log(Level.INFO,
                                                     "Looking up " + urlMatch + " in " + language
-                                                            + " in GEMET theme vocab.");
+                                                            + " in GEMET theme vocab...");
                                             CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch,
                                                     new LocalizedString(translations.get(0),
                                                             LANGUAGES.get(language).get(0)));
@@ -579,7 +579,7 @@ public class ISO19115DatasetPrinter implements Serializable {
      * @return
      */
     private boolean resultEquals(String xml1, String xml2) {
-        Map<Pattern, String> repl = new LinkedHashMap(); // maintain insertion order!
+        Map<Pattern, String> repl = new LinkedHashMap<>(); // maintain insertion order!
         String comp1 = StringUtils.flattenString(xml1);
         String comp2 = StringUtils.flattenString(xml2);
         Pattern dates = Pattern.compile("<gmd:dateStamp><gco:DateTime>.*?<\\/gco:DateTime><\\/gmd:dateStamp>");
@@ -668,7 +668,7 @@ public class ISO19115DatasetPrinter implements Serializable {
 
                     String flattenedExistingXml = StringUtils.flattenString(existingXml);
                     String flattenedNewXml = StringUtils.flattenString(newXml);
-                    List<String> diffs = StringUtils.findNotMatching(flattenedExistingXml, flattenedNewXml);
+                    //List<String> diffs = StringUtils.findNotMatching(flattenedExistingXml, flattenedNewXml);
                     message.append(
                             " overwritten because updates where needed. All differences (gml:id and timestamps were ignored):");
                     message.append("\n");

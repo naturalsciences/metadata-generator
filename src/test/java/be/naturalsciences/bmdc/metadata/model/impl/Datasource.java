@@ -30,7 +30,7 @@ public class Datasource implements IDatasource {
     List<IPlatform> platforms;
     List<IRegion> regions;
     private String bibliographicReference;
-    private String spatialRepresentation;
+    //private String spatialRepresentation;
     private Double spatialResolutionDistance;
 
     public String getTitle() {
@@ -152,8 +152,7 @@ public class Datasource implements IDatasource {
 
     @Override
     public void setBibliographicReference(String reference) {
-        this.bibliographicReference = bibliographicReference;
-
+        this.bibliographicReference = reference;
     }
 
     /*@Override

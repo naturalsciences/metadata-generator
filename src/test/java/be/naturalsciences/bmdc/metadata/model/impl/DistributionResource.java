@@ -10,12 +10,11 @@ import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
 import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
 import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
 
-public class DistributionResource implements IDistributionResource, Serializable {
+public class DistributionResource implements IDistributionResource {
 
     static final long serialVersionUID = 1L;
 
@@ -28,7 +27,6 @@ public class DistributionResource implements IDistributionResource, Serializable
     private Double dataSizeInMegaBytes;
     private IInstituteRole distributor;
     private String onlineResourceIdentifier;
-    private String onlineResourceDescriptiveName;
     private String onlineResourceDescription;
     private String crs;
     private String onlineResourceName;
@@ -44,7 +42,6 @@ public class DistributionResource implements IDistributionResource, Serializable
         this.dataSizeInMegaBytes = dataSizeInBytes;
         this.distributor = distributor;
         this.onlineResourceIdentifier = onlineResourceIdentifier;
-        this.onlineResourceDescriptiveName = onlineResourceDescriptiveName;
         this.onlineResourceDescription = onlineResourceDescription;
     }
 

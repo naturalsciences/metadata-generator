@@ -6,14 +6,7 @@
 package be.naturalsciences.bmdc.metadata.model;
 
 import be.naturalsciences.bmdc.utils.LocalizedString;
-import be.naturalsciences.bmdc.metadata.model.IDatasource;
-import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
-import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
-import be.naturalsciences.bmdc.metadata.model.IKeyword;
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.URISyntaxException;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;

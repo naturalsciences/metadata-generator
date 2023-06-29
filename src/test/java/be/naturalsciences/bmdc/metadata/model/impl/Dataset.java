@@ -7,15 +7,10 @@ package be.naturalsciences.bmdc.metadata.model.impl;
 
 import be.naturalsciences.bmdc.metadata.model.IDataset;
 import be.naturalsciences.bmdc.metadata.model.IDatasource;
-import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
 import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
 import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IKeyword;
-import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
-import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
 import be.naturalsciences.bmdc.utils.LocalizedString;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -115,7 +110,7 @@ public class Dataset implements IDataset {
     }
 
     public void setMasterDatasets(List<IDataset> masterDatasets) {
-        this.masterDatasets = this.masterDatasets;
+        this.masterDatasets = masterDatasets;
     }
 
     public List<IDatasource> getDatasources() {
@@ -423,7 +418,7 @@ public class Dataset implements IDataset {
 
     @Override
     public List<String> getTopicCategory() {
-        List<String> results=new ArrayList();
+        List<String> results=new ArrayList<>();
         for (IKeyword kw : this.getKeywords()) {
             if (kw.getUrl().contains("TopicCategory")) {
                 results.add(kw.getPrefLabel());

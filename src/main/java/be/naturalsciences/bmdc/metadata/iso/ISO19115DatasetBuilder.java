@@ -1057,7 +1057,7 @@ public class ISO19115DatasetBuilder {
          */
         identification.setAggregationInfo(buildAggregateInformation(dataset.getMasterDatasets(), datasources));
 
-        Set<Keywords> keywords = new LinkedHashSet(); // sort according to keyword characteristics
+        Set<Keywords> keywords = new LinkedHashSet<>(); // sort according to keyword characteristics
 
         keywords.addAll(buildKeywords(dataset.getKeywords()));
 
@@ -1490,7 +1490,7 @@ public class ISO19115DatasetBuilder {
                     DefaultDistributor distributor = new DefaultDistributor();
                     distributor.setDistributorContact(buildResponsibleParty(distributionResource.getDistributor()));
                     distributor.setDistributorFormats(
-                            buildFormat(new HashSet(distributionResource.getDistributionFormats())));
+                            buildFormat(new HashSet<>(distributionResource.getDistributionFormats())));
 
                     Double dataSizeInMegaBytes = distributionResource.getDataSizeInMegaBytes();
                     DefaultDigitalTransferOptions digiTrans = new DefaultDigitalTransferOptions();

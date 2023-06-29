@@ -4,7 +4,6 @@
 
 package be.naturalsciences.bmdc.metadata.datacite.metadata;
 
-import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.ByteArrayOutputStream;

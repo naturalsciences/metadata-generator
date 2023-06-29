@@ -28,7 +28,6 @@ import be.naturalsciences.bmdc.metadata.model.impl.Keyword;
 import be.naturalsciences.bmdc.utils.FileUtils;
 import be.naturalsciences.bmdc.utils.LocalizedString;
 import be.naturalsciences.bmdc.utils.StringUtils;
-import be.naturalsciences.bmdc.metadata.datacite.mds.account.Account;
 import gnu.trove.set.hash.THashSet;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -116,25 +115,25 @@ public class ISO19115DatasetPrinterTest {
         Date endDate = new GregorianCalendar(2008, Calendar.JANUARY, 1).getTime();
 
         IInstituteRole distributor = new InstituteRole(IDataset.Role.DISTRIBUTOR, "BMDC", "02/545542", null, "Vautierstraat 29", "Brussel", "1000", "BE", "info@bmdc.be", "http://www.naturalsciences.be");
-        List<IInstituteRole> distributors = new ArrayList();
+        List<IInstituteRole> distributors = new ArrayList<>();
         distributors.add(distributor);
 
         IInstituteRole author = new InstituteRole(IDataset.Role.AUTHOR, "MARECO", "02/545542", null, "Vautierstraat 29", "Brussel", "1000", "BE", "info@bmdc.be", "http://www.naturalsciences.be");
         IInstituteRole originator = new InstituteRole(IDataset.Role.ORIGINATOR, "VLIZ", "059/65466546", null, "Wandelaarkaai 7", "Oostende", "8400", "BE", "info@vliz.be", "http://www.vliz.be");
-        List<IInstituteRole> parties = new ArrayList();
+        List<IInstituteRole> parties = new ArrayList<>();
         parties.add(author);
         parties.add(originator);
-        IDatasource dso = new Datasource("Advanced modelling and research on...", null, "bmdc:dso::2200", publicationDate1, "Degraer, Haelters, Reubens", parties, new HashSet(Arrays.asList("NL", "EN")), null, null, null, null, null);
-        IDatasource dso2 = new Datasource("Final report on modelling and research on...", null, "bmdc:dso::2201", publicationDate2, "Degraer, Rumes, Fettweis", parties, new HashSet(Arrays.asList("EN")), null, null, null, null, null);
-        List sources = new ArrayList();
+        IDatasource dso = new Datasource("Advanced modelling and research on...", null, "bmdc:dso::2200", publicationDate1, "Degraer, Haelters, Reubens", parties, new HashSet<>(Arrays.asList("NL", "EN")), null, null, null, null, null);
+        IDatasource dso2 = new Datasource("Final report on modelling and research on...", null, "bmdc:dso::2201", publicationDate2, "Degraer, Rumes, Fettweis", parties, new HashSet<>(Arrays.asList("EN")), null, null, null, null, null);
+        List<IDatasource> sources = new ArrayList<>();
         sources.add(dso);
         sources.add(dso2);
         DistributionFormat format = new DistributionFormat("geo-json", FormatEnum.JSON, "geo-json", null, null);
         DistributionFormat format2 = new DistributionFormat("NetCDF", FormatEnum.NETCDF, "NetCDF", "1.2", null);
-        List<IDistributionFormat> formats = new ArrayList();
+        List<IDistributionFormat> formats = new ArrayList<>();
         formats.add(format);
         formats.add(format2);
-        Set<IDistributionResource> resources = new LinkedHashSet();
+        Set<IDistributionResource> resources = new LinkedHashSet<>();
         try {
             IInstituteRole BMDC_DISTRIBUTOR = new InstituteRole(IDataset.Role.DISTRIBUTOR, "BMDC", "02/773.21.44", null, "Vautierstraat 29", "Brussel", "1000", "BE", "bmdc@naturalsciences.be", "http://www.bmdc.be");
 
@@ -144,10 +143,10 @@ public class ISO19115DatasetPrinterTest {
             Logger.getLogger(ISO19115DatasetPrinterTest.class.getName()).log(Level.SEVERE, "An exception occured.", ex);
         }
 
-        Set<IDataset.InspireTheme> themes = new THashSet();
+        Set<IDataset.InspireTheme> themes = new THashSet<>();
         //themes.add(IDataset.InspireTheme.OCEANOGRAPHIC_GEOGRAPHICAL_FEATURES);
 
-        Dataset dst = new Dataset("bmdc:dst::5020", "Data from 'Advanced modelling and research on...'", creationDate, revisionDate, new HashSet(Arrays.asList("NL", "EN")), "4326", null, null, sources, "Dataset combined from two publications. Contains parameters on salinity, temperature, biota composition and mainly biodiversity. Gathered from 2005 to 2008. Belgica research vessel during cruises...", startDate, endDate, 50.0, 52.0, 2.0, 3.0, resources, "Dataset combined from sources. Descriptive staistical analysis performed.", themes, null, IDataset.SpatialType.VECTOR, createKeywords());
+        Dataset dst = new Dataset("bmdc:dst::5020", "Data from 'Advanced modelling and research on...'", creationDate, revisionDate, new HashSet<>(Arrays.asList("NL", "EN")), "4326", null, null, sources, "Dataset combined from two publications. Contains parameters on salinity, temperature, biota composition and mainly biodiversity. Gathered from 2005 to 2008. Belgica research vessel during cruises...", startDate, endDate, 50.0, 52.0, 2.0, 3.0, resources, "Dataset combined from sources. Descriptive staistical analysis performed.", themes, null, IDataset.SpatialType.VECTOR, createKeywords());
         dst.setBrowseGraphicUrl(MSFD_IMAGE);
         return dst;
     }
@@ -164,18 +163,18 @@ public class ISO19115DatasetPrinterTest {
 
         IInstituteRole author = new InstituteRole(IDataset.Role.AUTHOR, "MARECO", "02/545542", null, "Vautierstraat 29", "Brussel", "1000", "BE", "info@bmdc.be", "http://www.naturalsciences.be");
         IInstituteRole originator = new InstituteRole(IDataset.Role.ORIGINATOR, "VLIZ", "059/65466546", null, "Wandelaarkaai 7", "Oostende", "8400", "BE", "info@vliz.be", "http://www.vliz.be");
-        List<IInstituteRole> parties = new ArrayList();
+        List<IInstituteRole> parties = new ArrayList<>();
         parties.add(author);
         parties.add(originator);
-        IDatasource dso = new Datasource("Advanced modelling and research on...", null, "bmdc:dso::2200", publicationDate1, "Degraer, Haelters, Reubens", parties, new HashSet(Arrays.asList("NL", "EN")), null, null, null, null, null);
-        IDatasource dso2 = new Datasource("Final report on modelling and research on...", null, "bmdc:dso::2201", publicationDate2, "Degraer, Rumes, Fettweis", parties, new HashSet(Arrays.asList("EN")), null, null, null, null, null);
-        List sources = new ArrayList();
+        IDatasource dso = new Datasource("Advanced modelling and research on...", null, "bmdc:dso::2200", publicationDate1, "Degraer, Haelters, Reubens", parties, new HashSet<>(Arrays.asList("NL", "EN")), null, null, null, null, null);
+        IDatasource dso2 = new Datasource("Final report on modelling and research on...", null, "bmdc:dso::2201", publicationDate2, "Degraer, Rumes, Fettweis", parties, new HashSet<>(Arrays.asList("EN")), null, null, null, null, null);
+        List<IDatasource> sources = new ArrayList<>();
         sources.add(dso);
         sources.add(dso2);
 
-        Set<IDataset.InspireTheme> themes = new THashSet();
-        Dataset dst = new Dataset("bmdc:dst::5021", "Data from 'Advanced modelling and research on...'", creationDate, revisionDate, new HashSet(Arrays.asList("NL", "EN")), "4326", null, null, sources, "Dataset combined from two publications. Contains parameters on salinity, temperature, biota composition and mainly biodiversity. Gathered from 2005 to 2008. Belgica research vessel during cruises...", startDate, endDate, 50.0, 52.0, 2.0, 3.0, null, "Dataset combined from sources. Descriptive staistical analysis performed.", themes, null, IDataset.SpatialType.TEXT_TABLE, createKeywords());
-        Set titles = new HashSet<>();
+        Set<IDataset.InspireTheme> themes = new THashSet<>();
+        Dataset dst = new Dataset("bmdc:dst::5021", "Data from 'Advanced modelling and research on...'", creationDate, revisionDate, new HashSet<>(Arrays.asList("NL", "EN")), "4326", null, null, sources, "Dataset combined from two publications. Contains parameters on salinity, temperature, biota composition and mainly biodiversity. Gathered from 2005 to 2008. Belgica research vessel during cruises...", startDate, endDate, 50.0, 52.0, 2.0, 3.0, null, "Dataset combined from sources. Descriptive staistical analysis performed.", themes, null, IDataset.SpatialType.TEXT_TABLE, createKeywords());
+        Set<LocalizedString> titles = new HashSet<>();
         titles.add(new LocalizedString("Les données du dataset 'Advanced modelling and research on...'", Locale.FRENCH));
         titles.add(new LocalizedString("Die daten datasets 'Advanced modelling and research on...'", Locale.GERMAN));
         dst.setMultilingualTitles(titles);
@@ -291,13 +290,13 @@ public class ISO19115DatasetPrinterTest {
         ISO19115DatasetPrinter printer2 = null;
         if (ds != null) {
             builder = new ISO19115DatasetBuilder(ds, false, true, false, false, BMDC_CONTACT, "Belgian Marine Data Centre");
-            printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
+            printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         }
 
         IDataset ds2 = createFakeDataset2();
         if (ds2 != null) {
             builder2 = new ISO19115DatasetBuilder(ds2, false, true, false, false, BMDC_CONTACT, "Belgian Marine Data Centre");
-            printer2 = new ISO19115DatasetPrinter(builder2, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
+            printer2 = new ISO19115DatasetPrinter(builder2, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         }
         if (printer != null && !printer.equals(printer2)) {
             innerTestCreateFile(builder, "TEST_EQUALS_" + builder.getFileName());
@@ -314,7 +313,7 @@ public class ISO19115DatasetPrinterTest {
 
     private void testDOI(IDataset dst) throws IOException, JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(dst, false, true, false, false, null, "Belgian Marine Data Centre");
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_ACCOUNT), false);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_ACCOUNT), false);
         String xml = printer.getResult();
         String id = dst.getIdentifier();
         //assertTrue(xml.contains("<gmx:Anchor xlink:href=\"https://doi.org/10.5072/" + id + "\">10.5072/" + id + "</gmx:Anchor>"));
@@ -322,7 +321,7 @@ public class ISO19115DatasetPrinterTest {
 
     private void testXML(IDataset dst) throws IOException, JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(dst, false, true, false, false, null, "Belgian Marine Data Centre");
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         String xml = printer.getResult();
         System.out.println(xml);
         assertTrue(xml.contains("xml version=\"1.0\""));
@@ -375,7 +374,7 @@ public class ISO19115DatasetPrinterTest {
 
     private File innerTestCreateFile(ISO19115DatasetBuilder instance, String fileName) throws IOException, FileNotFoundException, JAXBException {
         //String getMetadataFileName = instance.getMetadataFileName();
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(instance, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_ACCOUNT), false);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(instance, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_ACCOUNT), false);
         File file = File.createTempFile(fileName, ".xml");
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Test file stored at " + file.getPath());
 
@@ -386,14 +385,14 @@ public class ISO19115DatasetPrinterTest {
 
     private void testTranslatedTitle(IDataset ds) throws JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds, false, true, false, false, null, "Belgian Marine Data Centre");
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         String xml = printer.getResult();
         assertTrue(xml.contains("<gmd:LocalisedCharacterString locale=\"#DE\">Die daten datasets 'Advanced modelling and research on...'</gmd:LocalisedCharacterString>"));
     }
 
     private void testAnchorForLaw(IDataset ds) throws JAXBException {
           ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds, true, true, false, false, null, "Belgian Marine Data Centre");
-        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
+        ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
         String xml = printer.getResult();
         System.out.println(xml);
         assertTrue(xml.contains("<gmx:Anchor xlink:href=\"https://eur-lex.europa.eu/eli/reg/2010/1089\">"));

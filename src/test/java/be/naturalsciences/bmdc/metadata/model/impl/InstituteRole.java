@@ -108,7 +108,7 @@ public class InstituteRole implements IInstituteRole {
     }
 
     @Override
-    public void setEmailAddress(String emailAddresss) {
+    public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
     }
 
