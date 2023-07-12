@@ -22,15 +22,48 @@ public interface IDataset extends Serializable {
     static final long serialVersionUID = 1L;
 
     public enum Role {
-        DISTRIBUTOR, RESOURCEPROVIDER, COAUTHOR, EDITOR, CONTRIBUTOR, OWNER, USER, STAKEHOLDER, RIGHTS_HOLDER, FUNDER, PUBLISHER, AUTHOR, POINT_OF_CONTACT, PRINCIPAL_INVESTIGATOR, MEDIATOR, PROCESSOR, ORIGINATOR, CUSTODIAN, COLLABORATOR, SPONSOR
+        DISTRIBUTOR, RESOURCEPROVIDER, COAUTHOR, EDITOR, CONTRIBUTOR, OWNER, USER, STAKEHOLDER, RIGHTS_HOLDER, FUNDER,
+        PUBLISHER, AUTHOR, POINT_OF_CONTACT, PRINCIPAL_INVESTIGATOR, MEDIATOR, PROCESSOR, ORIGINATOR, CUSTODIAN,
+        COLLABORATOR, SPONSOR
     }
 
     public enum InspireTheme {
-        ADDRESSES, ADMINISTRATIVE_UNITS, AGRICULTURAL_AND_AQUACULTURE_FACILITIES, AREA_MANAGEMENT_RESTRICTION_REGULATION_ZONES_AND_REPORTING_UNITS, ATMOSPHERIC_CONDITIONS, BIO_GEOGRAPHICAL_REGIONS, BUILDINGS, CADASTRAL_PARCELS, COORDINATE_REFERENCE_SYSTEMS, ELEVATION, ENERGY_RESOURCES, ENVIRONMENTAL_MONITORING_FACILITIES, GEOGRAPHICAL_GRID_SYSTEMS, GEOGRAPHICAL_NAMES, GEOLOGY, HABITATS_AND_BIOTOPES, HUMAN_HEALTH_AND_SAFETY, HYDROGRAPHY, LAND_COVER, LAND_USE, METEOROLOGICAL_GEOGRAPHICAL_FEATURES, MINERAL_RESOURCES, NATURAL_RISK_ZONES, OCEANOGRAPHIC_GEOGRAPHICAL_FEATURES, ORTHOIMAGERY, POPULATION_DISTRIBUTION_DEMOGRAPHY, PRODUCTION_AND_INDUSTRIAL_FACILITIES, PROTECTED_SITES, SEA_REGIONS, SOIL, SPECIES_DISTRIBUTION, STATISTICAL_UNITS, TRANSPORT_NETWORKS, UTILITY_AND_GOVERNMENTAL_SERVICES
+        ADDRESSES, ADMINISTRATIVE_UNITS, AGRICULTURAL_AND_AQUACULTURE_FACILITIES,
+        AREA_MANAGEMENT_RESTRICTION_REGULATION_ZONES_AND_REPORTING_UNITS, ATMOSPHERIC_CONDITIONS,
+        BIO_GEOGRAPHICAL_REGIONS, BUILDINGS, CADASTRAL_PARCELS, COORDINATE_REFERENCE_SYSTEMS, ELEVATION,
+        ENERGY_RESOURCES, ENVIRONMENTAL_MONITORING_FACILITIES, GEOGRAPHICAL_GRID_SYSTEMS, GEOGRAPHICAL_NAMES, GEOLOGY,
+        HABITATS_AND_BIOTOPES, HUMAN_HEALTH_AND_SAFETY, HYDROGRAPHY, LAND_COVER, LAND_USE,
+        METEOROLOGICAL_GEOGRAPHICAL_FEATURES, MINERAL_RESOURCES, NATURAL_RISK_ZONES,
+        OCEANOGRAPHIC_GEOGRAPHICAL_FEATURES, ORTHOIMAGERY, POPULATION_DISTRIBUTION_DEMOGRAPHY,
+        PRODUCTION_AND_INDUSTRIAL_FACILITIES, PROTECTED_SITES, SEA_REGIONS, SOIL, SPECIES_DISTRIBUTION,
+        STATISTICAL_UNITS, TRANSPORT_NETWORKS, UTILITY_AND_GOVERNMENTAL_SERVICES
     }
 
     public enum SpatialType {
         VECTOR, GRID, STEREO_MODEL, TEXT_TABLE, TIN, VIDEO
+    }
+
+    public enum TopicCategory {
+        BIOTA,
+        BOUNDARIES,
+        CLIMATOLOGY_METEOROLOGY_ATMOSPHERE,
+        ECONOMY,
+        ELEVATION,
+        ENVIRONMENT,
+        FARMING,
+        GEOSCIENTIFIC_INFORMATION,
+        HEALTH,
+        IMAGERY_BASE_MAPS_EARTH_COVER,
+        INLAND_WATERS,
+        INTELLIGENCE_MILITARY,
+        LOCATION,
+        OCEANS,
+        PLANNING_CADASTRE,
+        SOCIETY,
+        STRUCTURE,
+        TRANSPORTATION,
+        UTILITIES_COMMUNICATION
+
     }
 
     public String getIdentifier();
@@ -117,7 +150,13 @@ public interface IDataset extends Serializable {
 
     public void setDistributionResources(Collection<IDistributionResource> distributionResources);
 
-    //public boolean addDistributionResource(boolean placeHolder, String baseUrl, String distributionResourceIdentifier, String distributionResourceDescriptiveName, String distributionResourceDescription, Map<String, String> urlArgumentValues, OnlinePossibilityEnum onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats, IInstituteRole distributor, String crs) throws IOException, URISyntaxException;
+    // public boolean addDistributionResource(boolean placeHolder, String baseUrl,
+    // String distributionResourceIdentifier, String
+    // distributionResourceDescriptiveName, String distributionResourceDescription,
+    // Map<String, String> urlArgumentValues, OnlinePossibilityEnum
+    // onlinePossibility, ProtocolEnum protocol, List<IDistributionFormat> formats,
+    // IInstituteRole distributor, String crs) throws IOException,
+    // URISyntaxException;
 
     public void setPointsOfContact(Collection<IInstituteRole> pointsOfContact);
 
@@ -173,12 +212,12 @@ public interface IDataset extends Serializable {
 
     public void setLicenseUrl(String licenseUrl);
 
-    public Map<String,String> getExternaMetadataUrl();
+    public Map<String, String> getExternaMetadataUrl();
 
-    public void setExternaMetadataUrl(Map<String,String> externalDefinitionUrl);
-    
-    public List<String> getTopicCategory();
-    
-     public void setTopicCategory(List<String> topicCategory);
+    public void setExternaMetadataUrl(Map<String, String> externalDefinitionUrl);
+
+    public List<TopicCategory> getTopicCategory();
+
+    public void setTopicCategory(List<TopicCategory> topicCategory);
 
 }

@@ -116,7 +116,7 @@ import org.opengis.util.InternationalString;
  */
 public class ISO19115DatasetBuilder {
 
-    public static final Logger LOG = Logger.getLogger(ISO19115DatasetBuilder.class.getName());
+    public static final Logger LOG = Logger.getLogger("metadata-generator");
 
     public static final Map<String, String> COUNTRIES;
     public static final Map<String, List<Locale>> LANGUAGES;
@@ -881,7 +881,7 @@ public class ISO19115DatasetBuilder {
             }
         }
         if (otherCitationDetails != null) {
-            citation.setOtherCitationDetails(new SimpleInternationalString(otherCitationDetails.toString()));
+            citation.setOtherCitationDetails(singleton(new SimpleInternationalString(otherCitationDetails.toString())));
         }
 
         Set<Identifier> identifiers = new HashSet<>();
@@ -978,7 +978,7 @@ public class ISO19115DatasetBuilder {
                 contacts.add(buildResponsibleParty(contact));
             }
         }
-        if (!useDatasetCitationResponsibleParty) { // don't add the resp parties that have already been added in the the
+        if (!useDatasetCitationResponsibleParty) { // don't add the resp parties that have already been added in
                                                    // CI_Citation again
             for (IDatasource datasource : dataset.getDatasources()) {
                 if (datasource.getParties() != null) {
@@ -988,7 +988,6 @@ public class ISO19115DatasetBuilder {
                                 party.getOrganisationName(), party.getPhone(), party.getFax(), party.getDeliveryPoint(),
                                 party.getCity(), party.getPostalCode(), party.getSdnCountryCode(),
                                 party.getEmailAddress(), party.getWebsite());
-
                         if (responsibleParty != null) {
                             contacts.add(responsibleParty);
                         }
@@ -996,6 +995,7 @@ public class ISO19115DatasetBuilder {
                 }
             }
         }
+        identification.setPointOfContacts(contacts);
         if (dataset.getBrowseGraphicUrl() != null) {
             Set<BrowseGraphic> graphics = new HashSet<>();
             URI imageUri = URI.create(dataset.getBrowseGraphicUrl());
@@ -1008,7 +1008,7 @@ public class ISO19115DatasetBuilder {
             graphics.add(browseGraphic);
             identification.setGraphicOverviews(graphics);
         }
-        identification.setPointOfContacts(contacts);
+
         identification.setCitation(buildDatasetCitation(dataset, useDatasetCitationResponsibleParty, true)); // don't
                                                                                                              // add the
                                                                                                              // resp.
@@ -1032,8 +1032,8 @@ public class ISO19115DatasetBuilder {
             identification.setLanguages(singleton(Locale.ENGLISH));
         }
         List<TopicCategory> topics = new ArrayList<>();
-        for (String topic : dataset.getTopicCategory()) {
-            TopicCategory tc = topic == null ? null : TopicCategory.valueOf(topic);
+        for (IDataset.TopicCategory topic : dataset.getTopicCategory()) {
+            TopicCategory tc = topic == null ? null : TopicCategory.valueOf(topic.name());
             if (tc != null) {
                 topics.add(tc);
             }
@@ -1137,7 +1137,7 @@ public class ISO19115DatasetBuilder {
                         || email != null) {
                     DefaultAddress add = new DefaultAddress();
                     if (deliveryPoint != null) {
-                        add.setDeliveryPoints(singleton(deliveryPoint));
+                        add.setDeliveryPoints(singleton(new SimpleInternationalString(deliveryPoint)));
                     }
                     if (city != null) {
                         add.setCity(new SimpleInternationalString(city));
@@ -1162,9 +1162,7 @@ public class ISO19115DatasetBuilder {
                     o.setProtocol("http");
                     contact.setOnlineResources(singleton(o));
                 }
-
                 rp.setContactInfo(contact);
-
             }
         }
         return rp;
@@ -1523,7 +1521,12 @@ public class ISO19115DatasetBuilder {
                         if (distributionResource.getFunction() != null) {
                             resource.setFunction(ONLINE_FUNCTIONS.get(distributionResource.getFunction()));
                         }
-                        resource.setName(distributionResource.getOnlineResourceName()); //either a human readable name or an identifier on a wfs
+                        resource.setName(new SimpleInternationalString(distributionResource.getOnlineResourceName())); // either
+                                                                                                                       // a
+                                                                                                                       // human
+                                                                                                                       // readable
+                                                                                                                       // name
+                        // or an identifier on a wfs
                         resource.setProtocol(distributionResource.getOnlineResourceProtocol().getOfficialProtocol());
                         resources.add(resource);
                     }
@@ -1710,7 +1713,10 @@ public class ISO19115DatasetBuilder {
             metadata.setReferenceSystemInfo(singleton(buildReferenceSystem(dataset.getEpsgCode(), false)));
 
             metadata.setIdentificationInfo(singleton(buildIdentificationInfo(dataset)));
-            metadata.setDistributionInfo(buildDistributionInfo(dataset));
+            Distribution distributionInfo = buildDistributionInfo(dataset);
+            if (distributionInfo != null) {
+                metadata.setDistributionInfo(singleton(distributionInfo));
+            }
             metadata.setDataQualityInfo(buildDataQualityInfo(dataset));
         }
         return metadata;

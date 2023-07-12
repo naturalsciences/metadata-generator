@@ -302,7 +302,7 @@ public class ISO19115DatasetPrinterTest {
             innerTestCreateFile(builder, "TEST_EQUALS_" + builder.getFileName());
             innerTestCreateFile(builder2, "TEST_EQUALS_" + builder2.getFileName());
             System.out.println("<---DIFFS---->");
-            for (String string : StringUtils.findNotMatching(printer.getResult(), printer2.getResult())) {
+            for (String string : StringUtils.findNotMatching(printer.print(), printer2.print())) {
                 System.out.println(string);
             }
             System.out.println("<---DIFFS---->");
@@ -314,7 +314,7 @@ public class ISO19115DatasetPrinterTest {
     private void testDOI(IDataset dst) throws IOException, JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(dst, false, true, false, false, null, "Belgian Marine Data Centre");
         ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, new ISO19115toDataCitePublisher(PostIsoMetadataTest.TEST_ACCOUNT), false);
-        String xml = printer.getResult();
+        String xml = printer.print();
         String id = dst.getIdentifier();
         //assertTrue(xml.contains("<gmx:Anchor xlink:href=\"https://doi.org/10.5072/" + id + "\">10.5072/" + id + "</gmx:Anchor>"));
     }
@@ -322,7 +322,7 @@ public class ISO19115DatasetPrinterTest {
     private void testXML(IDataset dst) throws IOException, JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(dst, false, true, false, false, null, "Belgian Marine Data Centre");
         ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
-        String xml = printer.getResult();
+        String xml = printer.print();
         System.out.println(xml);
         assertTrue(xml.contains("xml version=\"1.0\""));
         assertTrue(xml.contains("MD_Metadata"));
@@ -386,14 +386,14 @@ public class ISO19115DatasetPrinterTest {
     private void testTranslatedTitle(IDataset ds) throws JAXBException {
         ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds, false, true, false, false, null, "Belgian Marine Data Centre");
         ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
-        String xml = printer.getResult();
+        String xml = printer.print();
         assertTrue(xml.contains("<gmd:LocalisedCharacterString locale=\"#DE\">Die daten datasets 'Advanced modelling and research on...'</gmd:LocalisedCharacterString>"));
     }
 
     private void testAnchorForLaw(IDataset ds) throws JAXBException {
           ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds, true, true, false, false, null, "Belgian Marine Data Centre");
         ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder, new HashSet<>(Arrays.asList(new String[]{"EN", "NL", "FR", "DE"})), TRANSLATIONS, null, false);
-        String xml = printer.getResult();
+        String xml = printer.print();
         System.out.println(xml);
         assertTrue(xml.contains("<gmx:Anchor xlink:href=\"https://eur-lex.europa.eu/eli/reg/2010/1089\">"));
 

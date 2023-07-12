@@ -48,7 +48,7 @@
       <artifactId>geotk-xml-gml</artifactId>
       <version>4.0-M5</version>
       <type>jar</type>
-      <exclusions>
+      <!-- <exclusions>
         <exclusion>
           <groupId>org.opengis</groupId>
           <artifactId>geoapi</artifactId>
@@ -77,20 +77,20 @@
           <groupId>org.apache.sis.core</groupId>
           <artifactId>sis-metadata</artifactId>
         </exclusion>
-      </exclusions>
+      </exclusions> -->
     </dependency>
-    <dependency>
+    <!--     <dependency>
       <groupId>org.apache.sis.core</groupId>
       <artifactId>sis-feature</artifactId>
       <version>0.8</version>
-      <!--keep geoapi in for wildfly-->
-      <!--<exclusions>
+      //keep geoapi in for wildfly
+      //<exclusions>
            <exclusion>
            <groupId>org.opengis</groupId>
            <artifactId>geoapi</artifactId>
            </exclusion>
-           </exclusions>-->
-    </dependency>
+           </exclusions>
+    </dependency> -->
     <dependency>
       <groupId>be.naturalsciences.bmdc</groupId>
       <artifactId>bmdc-utils</artifactId>

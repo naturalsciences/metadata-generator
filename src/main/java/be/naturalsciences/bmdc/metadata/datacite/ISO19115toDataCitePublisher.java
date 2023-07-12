@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
  */
 public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMetadataModifier {
 
-    public static final Logger LOG = Logger.getLogger(ISO19115toDataCitePublisher.class.getName());
+    public static final Logger LOG = Logger.getLogger("metadata-generator");
 
     private static final String ISO_2_DC_XSLT_FILENAME = "iso2datacite3.xsl";
     private static URL DATACITE_4_XSD;
@@ -62,7 +62,7 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
     private final Account account;
     private String xmlDCMetadata;
     private String datasetIdentifier;
-    private Document isoMetadata;
+    private Document xmlIsoMetadata;
     private boolean dCMetadataValid = true;
 
     /**
@@ -98,7 +98,7 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
 
     @Override
     public void setIsoMetadata(Document isoMetadata) throws InvalidMetadataException {
-        this.isoMetadata = isoMetadata;
+        this.xmlIsoMetadata = isoMetadata;
         updateDatasetIdentifier();
         updateDCMetadata();
     }
@@ -117,11 +117,11 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
 
     @Override
     public Document getIsoMetadata() {
-        return isoMetadata;
+        return xmlIsoMetadata;
     }
 
     public String getISOMetadata() {
-        return XMLUtils.toXML(isoMetadata);
+        return XMLUtils.toXML(xmlIsoMetadata);
     }
 
     private void updateDCMetadata() throws InvalidMetadataException {
@@ -130,8 +130,6 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
                                                                                                  // requires version 2!;
                                                                                                  // the simple one works
                                                                                                  // with version 1
-            // System.out.println(account);
-            // System.out.println(account.getPrefix());
             dcMd = dcMd.replaceAll("doiPrefixPlaceholder", account.getPrefix());
             this.xmlDCMetadata = dcMd;
             IValidationResult result = XMLUtils.validateXMLAgainstXSD(DATACITE_4_XSD, dcMd);
@@ -161,7 +159,7 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
 
     private void updateISOMetadata(String xmlISOMetadata) {
         try {
-            isoMetadata = XMLUtils.toDocument(xmlISOMetadata);
+            xmlIsoMetadata = XMLUtils.toDocument(xmlISOMetadata);
         } catch (JAXBException ex) {
             LOG.log(Level.SEVERE, null, ex);
         } catch (ParserConfigurationException ex) {
@@ -190,21 +188,21 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
     }
 
     private void updateDatasetIdentifier() {
-        List<String> fileIdentifiers = XMLUtils.xpathQueryString(isoMetadata,
+        List<String> fileIdentifiers = XMLUtils.xpathQueryString(xmlIsoMetadata,
                 "//gmd:fileIdentifier/gco:CharacterString/text()", ISO19115DatasetPrinter.MD_NAMESPACES);
         String fileIdentifier = fileIdentifiers.get(0);
         datasetIdentifier = fileIdentifier;
     }
 
     @Override
-    public void updateOriginalMetadata() {
-        if (isoMetadata != null) {
+    public void updateISOMetadata() {
+        if (xmlIsoMetadata != null) {
             XMLElement element = new XMLElement(
                     "gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:date[last()]",
                     null, null, null);
             List<Node> nodes;
             try {
-                nodes = XMLUtils.xpathQueryNodes(isoMetadata, element.toXPath(), ISO19115DatasetPrinter.MD_NAMESPACES); // is
+                nodes = XMLUtils.xpathQueryNodes(xmlIsoMetadata, element.toXPath(), ISO19115DatasetPrinter.MD_NAMESPACES); // is
                                                                                                                         // the
                                                                                                                         // element
                                                                                                                         // even
@@ -212,9 +210,7 @@ public final class ISO19115toDataCitePublisher implements IPostMetadata, IsoMeta
                                                                                                                         // in
                                                                                                                         // the
                                                                                                                         // document??
-                XMLUtils.pasteAfter(isoMetadata, nodes, getIdentifierSnippet(), ISO19115DatasetPrinter.MD_NAMESPACES);
-                LOG.log(Level.INFO,
-                        "Added doi MD_Identifier for dataset " + datasetIdentifier);
+                XMLUtils.pasteAfter(xmlIsoMetadata, nodes, getIdentifierSnippet(), ISO19115DatasetPrinter.MD_NAMESPACES);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE,
                         "There was a problem appending the XML", ex);

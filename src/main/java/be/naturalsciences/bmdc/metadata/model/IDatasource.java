@@ -68,9 +68,9 @@ public interface IDatasource extends Serializable {
 
     public void setBibliographicReference(String reference);
 
-    /*public String getSpatialRepresentation();
+    public String getSpatialRepresentation();
 
-    public void setSpatialRepresentation(String spatialRepresentation);*/
+    public void setSpatialRepresentation(String spatialRepresentation);
 
     public Double getSpatialResolutionDistance();
 

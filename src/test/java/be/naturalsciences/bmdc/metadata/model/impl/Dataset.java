@@ -417,18 +417,18 @@ public class Dataset implements IDataset {
     }
 
     @Override
-    public List<String> getTopicCategory() {
-        List<String> results=new ArrayList<>();
+    public List<TopicCategory> getTopicCategory() {
+        List<TopicCategory> results=new ArrayList<>();
         for (IKeyword kw : this.getKeywords()) {
             if (kw.getUrl().contains("TopicCategory")) {
-                results.add(kw.getPrefLabel());
+                results.add(TopicCategory.valueOf(kw.getPrefLabel()));
             }
         }
         return results;
     }
 
     @Override
-    public void setTopicCategory(List<String> topicCategory) {
+    public void setTopicCategory(List<TopicCategory> topicCategory) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

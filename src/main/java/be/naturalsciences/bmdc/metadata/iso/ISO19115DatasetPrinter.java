@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
  */
 public class ISO19115DatasetPrinter implements Serializable {
 
-    public static final Logger LOG = Logger.getLogger(ISO19115DatasetPrinter.class.getName());
+    public static final Logger LOG = Logger.getLogger("metadata-generator");
 
     private IDataset dataset;
     private StringBuilder datasetText;
@@ -83,7 +83,7 @@ public class ISO19115DatasetPrinter implements Serializable {
 
     private static Map<String, Document> GEMET_FILTERED_RESULTS = new HashMap<>();
     private static Map<String, Set<LocalizedString>> ANCHOR_TRANSLATIONS_MAP = new LinkedHashMap<>(); // maintain
-                                                                                                      // insertion
+                                                                                                      // insertion //
                                                                                                       // order!
 
     static {
@@ -135,7 +135,7 @@ public class ISO19115DatasetPrinter implements Serializable {
     }
     private ISO19115toDataCitePublisher datacitePublisher;
 
-    public String getResult() {
+    public String print() {
         return this.datasetText.toString();
     }
 
@@ -154,25 +154,10 @@ public class ISO19115DatasetPrinter implements Serializable {
     public ISO19115DatasetPrinter(ISO19115DatasetBuilder builder, Set<String> keywordLanguages,
             Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher,
             boolean inspire) throws JAXBException {
-        this(builder.getDataset(), builder.getMetadataDocument(), keywordLanguages, extraTranslations,
-                datacitePublisher, inspire);
         this.builder = builder;
-        cleanupResult();
-    }
+        IDataset dataset = builder.getDataset();
+        DefaultMetadata metadata = builder.getMetadataDocument();
 
-    /**
-     * @param dataset
-     * @param metadata
-     * @param keywordLanguages The languages that terms (keywords etc.) need
-     *                         translation to. Provide languages in upper case (EN,
-     *                         DE, FR, NL, ES,IT,
-     *                         etc.). If provided as null, will resort to the
-     *                         default (EN, DE, FR, NL).
-     * @throws JAXBException
-     */
-    private ISO19115DatasetPrinter(IDataset dataset, DefaultMetadata metadata, Set<String> keywordLanguages,
-            Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher,
-            boolean inspire) throws JAXBException {
         if (dataset == null) {
             throw new IllegalArgumentException("Provided dataset argument is null.");
         }
@@ -199,7 +184,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                     themeRdfUrl = new URL("https://inspire.ec.europa.eu/theme/" + fileName);
                 } catch (MalformedURLException ex) {
                     LOG.log(Level.SEVERE, null, ex); // won't
-                                                                                                          // happen
+                                                     // happen
                 }
                 File file = new File(INSPIRE_RDF_DIR, fileName);
                 try {
@@ -237,7 +222,7 @@ public class ISO19115DatasetPrinter implements Serializable {
         String xml = XML.marshal(metadata);
         long endTime = System.currentTimeMillis();
         LOG.log(Level.INFO,
-                "Marshalling took " + (endTime - startTime) + " milliseconds");
+                "Marshalling took " + (endTime - startTime) + " ms");
         this.datasetText = new StringBuilder(xml);
         this.translator = new ISO19115StringTranslator();
         this.extraTranslations = extraTranslations;
@@ -255,6 +240,8 @@ public class ISO19115DatasetPrinter implements Serializable {
         if (multilingualLineages != null && !multilingualLineages.isEmpty()) {
             extraTranslations.put(dataset.getLineage(), multilingualLineages);
         }
+
+        cleanupAndTranslateResult();
     }
 
     /**
@@ -404,7 +391,10 @@ public class ISO19115DatasetPrinter implements Serializable {
      *
      * @return The ISO XML
      */
-    private void cleanupResult() throws JAXBException {
+    private void cleanupAndTranslateResult() throws JAXBException {
+        LOG.log(Level.INFO,
+                "Cleaning up XML for dataset " + dataset.getIdentifier() + "...");
+
         Date start = dataset.getStartDate();
         Date end = dataset.getEndDate();
 
@@ -535,6 +525,9 @@ public class ISO19115DatasetPrinter implements Serializable {
         }
 
         if (xml.contains("gmx:Anchor") || (extraTranslations != null && !extraTranslations.isEmpty())) {
+            LOG.log(Level.INFO,
+                    "Translating dataset " + dataset.getIdentifier() + "...");
+
             translator.setDocument(document);
             processAnchorTranslations();
             if (extraTranslations != null && !extraTranslations.isEmpty()) {
@@ -542,10 +535,11 @@ public class ISO19115DatasetPrinter implements Serializable {
             }
             translator.finalizeTranslations();
             datasetText = new StringBuilder(XMLUtils.toXML(translator.getDocument()));
-            long endTime = System.currentTimeMillis();
-            LOG.log(Level.INFO, "Translating elements for dataset "
-                    + dataset.getIdentifier() + " took " + (endTime - startTime) + " milliseconds");
         }
+
+        long endTime = System.currentTimeMillis();
+        LOG.log(Level.INFO, "Cleanup and translation took " + (endTime - startTime) + " ms");
+
         // this somehow causes every element to receive a PT_FreeText
         // System.out.println("DOM JAVA IMPLEMENTATION: " +
         // translator.getDocument().getImplementation());
@@ -554,8 +548,16 @@ public class ISO19115DatasetPrinter implements Serializable {
 
         if (datacitePublisher != null) {
             try {
+                LOG.log(Level.INFO,
+                        "Generating DataCite metadata for " + dataset.getIdentifier() + "...");
                 datacitePublisher.setIsoMetadata(translator.getDocument());
-                datacitePublisher.updateOriginalMetadata();
+                LOG.log(Level.INFO,
+                        "Generated DataCite metadata");
+                LOG.log(Level.INFO,
+                        "Adding doi MD_Identifier into " + dataset.getIdentifier() + "...");
+                datacitePublisher.updateISOMetadata();
+                LOG.log(Level.INFO,
+                        "Added doi MD_Identifier");
                 datasetText = new StringBuilder(datacitePublisher.getISOMetadata());
             } catch (InvalidMetadataException ex) {
                 LOG.log(Level.INFO, ex.getMessage());
@@ -607,7 +609,7 @@ public class ISO19115DatasetPrinter implements Serializable {
             return true;
         } else if (other instanceof ISO19115DatasetPrinter) {
             ISO19115DatasetPrinter otherPrinter = (ISO19115DatasetPrinter) other;
-            return resultEquals(this.getResult(), otherPrinter.getResult());
+            return resultEquals(this.print(), otherPrinter.print());
         }
         return false;
     }
@@ -644,7 +646,7 @@ public class ISO19115DatasetPrinter implements Serializable {
      */
     public void createFile(File file, boolean alwaysOverwrite) throws FileNotFoundException {
 
-        String newXml = getResult();
+        String newXml = print();
 
         String existingXml = null;
         StringBuilder message = new StringBuilder("File ");
@@ -668,7 +670,8 @@ public class ISO19115DatasetPrinter implements Serializable {
 
                     String flattenedExistingXml = StringUtils.flattenString(existingXml);
                     String flattenedNewXml = StringUtils.flattenString(newXml);
-                    //List<String> diffs = StringUtils.findNotMatching(flattenedExistingXml, flattenedNewXml);
+                    // List<String> diffs = StringUtils.findNotMatching(flattenedExistingXml,
+                    // flattenedNewXml);
                     message.append(
                             " overwritten because updates where needed. All differences (gml:id and timestamps were ignored):");
                     message.append("\n");
@@ -692,10 +695,5 @@ public class ISO19115DatasetPrinter implements Serializable {
         }
         LOG.log(Level.INFO, message.toString());
         dataset = null;
-    }
-
-    @Override
-    public String toString() {
-        return getResult();
     }
 }

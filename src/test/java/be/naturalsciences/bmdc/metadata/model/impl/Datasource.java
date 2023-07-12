@@ -30,7 +30,7 @@ public class Datasource implements IDatasource {
     List<IPlatform> platforms;
     List<IRegion> regions;
     private String bibliographicReference;
-    //private String spatialRepresentation;
+    private String spatialRepresentation;
     private Double spatialResolutionDistance;
 
     public String getTitle() {
@@ -115,7 +115,9 @@ public class Datasource implements IDatasource {
         this.platforms = platforms;
     }
 
-    public Datasource(String title, String subtitle, String identifier, Date publicationDate, String authorList, List<IInstituteRole> parties, Set<String> languages, List<IProject> projects, List<IParameter> paramaters, List<IPlatform> platforms, List<IRegion> regions, String bibliographicReference) {
+    public Datasource(String title, String subtitle, String identifier, Date publicationDate, String authorList,
+            List<IInstituteRole> parties, Set<String> languages, List<IProject> projects, List<IParameter> paramaters,
+            List<IPlatform> platforms, List<IRegion> regions, String bibliographicReference) {
         this.title = title;
         this.subtitle = subtitle;
         this.identifier = identifier;
@@ -155,7 +157,7 @@ public class Datasource implements IDatasource {
         this.bibliographicReference = reference;
     }
 
-    /*@Override
+    @Override
     public String getSpatialRepresentation() {
         return this.spatialRepresentation;
     }
@@ -163,7 +165,7 @@ public class Datasource implements IDatasource {
     @Override
     public void setSpatialRepresentation(String spatialRepresentation) {
         this.spatialRepresentation = spatialRepresentation;
-    }*/
+    }
 
     @Override
     public Double getSpatialResolutionDistance() {

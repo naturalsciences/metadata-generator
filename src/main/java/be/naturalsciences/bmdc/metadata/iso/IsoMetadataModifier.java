@@ -20,6 +20,6 @@ public interface IsoMetadataModifier {
 
     public String getIdentifierSnippet();
 
-    public void updateOriginalMetadata();
+    public void updateISOMetadata();
 
 }

@@ -111,7 +111,7 @@ public class PostIsoMetadataTest {
 
             assertTrue(metadataResponse.toString().contains(String
                     .format("<datacite:identifier identifierType=\"DOI\">%s/%s</datacite:identifier>", prefix, id)));
-            publisher.updateOriginalMetadata();
+            publisher.updateISOMetadata();
             String isoMetadata = publisher.getISOMetadata();
             assertTrue(isoMetadata.contains(String.format(
                     "<gmx:Anchor xlink:href=\"https://doi.org/%s/%s\">%s/%s</gmx:Anchor>", prefix, id, prefix, id)));

@@ -35,8 +35,8 @@ public enum ProtocolEnum {
         return humanReadableProtocol;
     }
 
-    ProtocolEnum(String officialProtocol, String niceProtocol) {
+    ProtocolEnum(String officialProtocol, String humanReadableProtocol) {
         this.officialProtocol = officialProtocol;
-        this.humanReadableProtocol = niceProtocol;
+        this.humanReadableProtocol = humanReadableProtocol;
     }
 }
