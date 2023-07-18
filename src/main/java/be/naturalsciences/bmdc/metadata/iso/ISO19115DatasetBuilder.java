@@ -116,7 +116,7 @@ import org.opengis.util.InternationalString;
  */
 public class ISO19115DatasetBuilder {
 
-    public static final Logger LOG = Logger.getLogger("metadata-generator");
+    public static final Logger LOG = Logger.getLogger(ISO19115DatasetBuilder.class.getSimpleName());
 
     public static final Map<String, String> COUNTRIES;
     public static final Map<String, List<Locale>> LANGUAGES;
@@ -134,7 +134,10 @@ public class ISO19115DatasetBuilder {
     public static final Date MARINE_REGIONS_PUBLICATION_DATE = new GregorianCalendar(2018, Calendar.FEBRUARY, 21)
             .getTime();
 
-    public static final String LINE_SEPARATOR = System.lineSeparator();
+    public static final String LINE_SEPARATOR = "\n" +
+            "";
+
+    // System.lineSeparator();
 
     public static final Role DEFAULT_ROLE = Role.AUTHOR;
 
@@ -851,17 +854,29 @@ public class ISO19115DatasetBuilder {
         TreeSet<IDatasource> datasources = new TreeSet<>(new DatasourceComparator());
         datasources.addAll(dataset.getDatasources());
 
-        StringBuilder otherCitationDetails = null;
+        // StringBuilder otherCitationDetailsSb = null;
+        int i = 1;
+        Set<String> otherCitationDetailsSet = new LinkedHashSet<>(); // no duplicates and preserve insert order.
+
+        int nbCitations = datasources.size();
         if (addOtherCitationDetails) {
             if (datasources.size() > 0) {
-                otherCitationDetails = new StringBuilder("Dataset composed of the following sources: ");
-                otherCitationDetails.append(LINE_SEPARATOR);
+                // otherCitationDetailsSb = new StringBuilder("Please cite as follows: ");
+                otherCitationDetailsSet.add("Please cite as follows: ");
+                otherCitationDetailsSet.add(LINE_SEPARATOR);
             }
         }
         for (IDatasource datasource : datasources) {
             if (addOtherCitationDetails) {
-                otherCitationDetails.append(buildReference(datasource));
-                otherCitationDetails.append(LINE_SEPARATOR);
+                if (nbCitations > 1) {
+                    otherCitationDetailsSet.add(String.format("%s) ", i));
+                }
+                otherCitationDetailsSet.add(buildReference(datasource));
+                if (i != nbCitations) {
+                    otherCitationDetailsSet.add(" ");
+                }
+                otherCitationDetailsSet.add(LINE_SEPARATOR);
+                i++;
             }
             if (addResponsibleParties && datasource.getParties() != null) { // authors, custodians, ...
                 for (IInstituteRole party : datasource.getParties()) {
@@ -880,8 +895,9 @@ public class ISO19115DatasetBuilder {
                 citation.setCitedResponsibleParties(responsibleParties);
             }
         }
-        if (otherCitationDetails != null) {
-            citation.setOtherCitationDetails(singleton(new SimpleInternationalString(otherCitationDetails.toString())));
+        if (otherCitationDetailsSet != null) {
+            citation.setOtherCitationDetails(
+                    singleton(new SimpleInternationalString(String.join("", otherCitationDetailsSet))));
         }
 
         Set<Identifier> identifiers = new HashSet<>();
@@ -899,7 +915,13 @@ public class ISO19115DatasetBuilder {
         return citation;
     }
 
-    private String buildReference(IDatasource datasource) {
+    /***
+     * Build an APA-style reference for the provided datasource.
+     * 
+     * @param datasource
+     * @return
+     */
+    public String buildReference(IDatasource datasource) {
         if (datasource.getBibliographicReference() == null) {
             StringBuilder reference = new StringBuilder();
             SimpleDateFormat yearF = new SimpleDateFormat("yyyy");
@@ -921,7 +943,7 @@ public class ISO19115DatasetBuilder {
             }
             reference.append(datasource.getTitle());
             if (!datasource.getTitle().endsWith(".")) {
-                reference.append(".");
+                reference.append(". ");
             }
             reference.append((datasource.getSubtitle() != null) ? datasource.getSubtitle() : "");
             if (datasource.getSubtitle() != null && !datasource.getSubtitle().endsWith(".")) {
@@ -1521,11 +1543,14 @@ public class ISO19115DatasetBuilder {
                         if (distributionResource.getFunction() != null) {
                             resource.setFunction(ONLINE_FUNCTIONS.get(distributionResource.getFunction()));
                         }
-                        resource.setName(new SimpleInternationalString(distributionResource.getOnlineResourceName())); // either
-                                                                                                                       // a
-                                                                                                                       // human
-                                                                                                                       // readable
-                                                                                                                       // name
+                        if (distributionResource.getOnlineResourceName() != null) {
+                            resource.setName(
+                                    new SimpleInternationalString(distributionResource.getOnlineResourceName())); // either
+                                                                                                                  // a
+                                                                                                                  // human
+                                                                                                                  // readable
+                                                                                                                  // name
+                        }
                         // or an identifier on a wfs
                         resource.setProtocol(distributionResource.getOnlineResourceProtocol().getOfficialProtocol());
                         resources.add(resource);

@@ -98,7 +98,7 @@ public class PostIsoMetadataTest {
         int postCode = shouldFail == false ? 201 : 404;
         int getCode = shouldFail == false ? 200 : 404;
         try {
-            ISO19115toDataCitePublisher publisher = new ISO19115toDataCitePublisher(TEST_ACCOUNT);
+            ISO19115toDataCitePublisher publisher = new ISO19115toDataCitePublisher(TEST_ACCOUNT, Logger.getAnonymousLogger());
             publisher.setIsoMetadata(testFile);
             HTTPResponse creationResponse = publisher.execute();
             System.out.println(publisher.getDCMetadata());

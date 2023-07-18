@@ -54,7 +54,7 @@ import org.xml.sax.SAXException;
  */
 public class ISO19115DatasetPrinter implements Serializable {
 
-    public static final Logger LOG = Logger.getLogger("metadata-generator");
+    public static final Logger LOG = Logger.getLogger(ISO19115DatasetPrinter.class.getSimpleName());
 
     private IDataset dataset;
     private StringBuilder datasetText;
@@ -134,6 +134,7 @@ public class ISO19115DatasetPrinter implements Serializable {
 
     }
     private ISO19115toDataCitePublisher datacitePublisher;
+    private Logger logger;
 
     public String print() {
         return this.datasetText.toString();
@@ -153,7 +154,8 @@ public class ISO19115DatasetPrinter implements Serializable {
 
     public ISO19115DatasetPrinter(ISO19115DatasetBuilder builder, Set<String> keywordLanguages,
             Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher,
-            boolean inspire) throws JAXBException {
+            boolean inspire, Logger logger) throws JAXBException {
+        this.logger = logger;
         this.builder = builder;
         IDataset dataset = builder.getDataset();
         DefaultMetadata metadata = builder.getMetadataDocument();
@@ -171,7 +173,7 @@ public class ISO19115DatasetPrinter implements Serializable {
             try {
                 Files.createDirectories(INSPIRE_RDF_DIR.toPath());
             } catch (IOException e) {
-                LOG.log(Level.SEVERE, "Couldn't create directory.",
+                logger.log(Level.SEVERE, "Couldn't create directory.",
                         e);
             }
         }
@@ -183,22 +185,22 @@ public class ISO19115DatasetPrinter implements Serializable {
                 try {
                     themeRdfUrl = new URL("https://inspire.ec.europa.eu/theme/" + fileName);
                 } catch (MalformedURLException ex) {
-                    LOG.log(Level.SEVERE, null, ex); // won't
-                                                     // happen
+                    logger.log(Level.SEVERE, null, ex); // won't
+                                                        // happen
                 }
                 File file = new File(INSPIRE_RDF_DIR, fileName);
                 try {
                     FileUtils.copyURLToFile(themeRdfUrl, file, CONNECTION_TIME_OUT, READ_TIME_OUT);
-                    LOG.log(Level.INFO,
+                    logger.log(Level.INFO,
                             "Downloaded " + themeRdfUrl);
                 } catch (IOException ex) {// i.e. the theme file couldn't be downloaded, re-use the local one
-                    LOG.log(Level.SEVERE,
+                    logger.log(Level.SEVERE,
                             "An exception occured while trying to download " + themeRdfUrl + ".", ex);
                     if (file.isFile()) { // if it's there already and it's a file
                         try {
                             INSPIRE_VOCABULARY.put(keywordLanguage, XMLUtils.toDocument(file));
                         } catch (Exception ex1) {
-                            LOG.log(Level.SEVERE, null, ex1);
+                            logger.log(Level.SEVERE, null, ex1);
                         }
                     }
                 }
@@ -210,18 +212,18 @@ public class ISO19115DatasetPrinter implements Serializable {
                         throw new Exception("The file " + file.getName() + " is not existing or empty.");
                     }
                 } catch (Exception ex1) {
-                    LOG.log(Level.SEVERE, null, ex1);
+                    logger.log(Level.SEVERE, null, ex1);
                 }
             }
         }
         this.dataset = dataset;
 
         long startTime = System.currentTimeMillis();
-        LOG.log(Level.INFO,
+        logger.log(Level.INFO,
                 "Marshalling XML for dataset " + dataset.getIdentifier() + "...");
         String xml = XML.marshal(metadata);
         long endTime = System.currentTimeMillis();
-        LOG.log(Level.INFO,
+        logger.log(Level.INFO,
                 "Marshalling took " + (endTime - startTime) + " ms");
         this.datasetText = new StringBuilder(xml);
         this.translator = new ISO19115StringTranslator();
@@ -344,7 +346,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                                                         + "']/dct:title/text()",
                                                 RDF_NAMESPACES);
                                         if (translations != null && !translations.isEmpty()) {
-                                            LOG.log(Level.INFO,
+                                            logger.log(Level.INFO,
                                                     "Looking up " + urlMatch + " in " + language
                                                             + " in INSPIRE theme vocab...");
                                             CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch,
@@ -357,7 +359,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                                         List<String> translations = XMLUtils.xpathQueryString(
                                                 GEMET_FILTERED_RESULTS.get(urlMatch), xPath, RDF_NAMESPACES);
                                         if (translations != null && !translations.isEmpty()) {
-                                            LOG.log(Level.INFO,
+                                            logger.log(Level.INFO,
                                                     "Looking up " + urlMatch + " in " + language
                                                             + " in GEMET theme vocab...");
                                             CollectionUtils.upsertMapOfSet(ANCHOR_TRANSLATIONS_MAP, urlMatch,
@@ -369,7 +371,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                                 }
                             }
                         } catch (Exception ex) {
-                            LOG.log(Level.SEVERE,
+                            logger.log(Level.SEVERE,
                                     "An exception occured. " + urlMatch + " could not be reached.", ex);
                         }
 
@@ -392,7 +394,7 @@ public class ISO19115DatasetPrinter implements Serializable {
      * @return The ISO XML
      */
     private void cleanupAndTranslateResult() throws JAXBException {
-        LOG.log(Level.INFO,
+        logger.log(Level.INFO,
                 "Cleaning up XML for dataset " + dataset.getIdentifier() + "...");
 
         Date start = dataset.getStartDate();
@@ -492,7 +494,6 @@ public class ISO19115DatasetPrinter implements Serializable {
         long startTime = System.currentTimeMillis();
 
         String xml = datasetText.toString();
-
         Document document = null;
         try {
             document = XMLUtils.toDocument(xml);
@@ -515,17 +516,17 @@ public class ISO19115DatasetPrinter implements Serializable {
                     vautierstraatExpanded, MD_NAMESPACES);
 
         } catch (XPathExpressionException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         } catch (ParserConfigurationException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         } catch (SAXException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
 
         if (xml.contains("gmx:Anchor") || (extraTranslations != null && !extraTranslations.isEmpty())) {
-            LOG.log(Level.INFO,
+            logger.log(Level.INFO,
                     "Translating dataset " + dataset.getIdentifier() + "...");
 
             translator.setDocument(document);
@@ -538,7 +539,7 @@ public class ISO19115DatasetPrinter implements Serializable {
         }
 
         long endTime = System.currentTimeMillis();
-        LOG.log(Level.INFO, "Cleanup and translation took " + (endTime - startTime) + " ms");
+        logger.log(Level.INFO, "Cleanup and translation took " + (endTime - startTime) + " ms");
 
         // this somehow causes every element to receive a PT_FreeText
         // System.out.println("DOM JAVA IMPLEMENTATION: " +
@@ -548,19 +549,19 @@ public class ISO19115DatasetPrinter implements Serializable {
 
         if (datacitePublisher != null) {
             try {
-                LOG.log(Level.INFO,
+                logger.log(Level.INFO,
                         "Generating DataCite metadata for " + dataset.getIdentifier() + "...");
                 datacitePublisher.setIsoMetadata(translator.getDocument());
-                LOG.log(Level.INFO,
+                logger.log(Level.INFO,
                         "Generated DataCite metadata");
-                LOG.log(Level.INFO,
+                logger.log(Level.INFO,
                         "Adding doi MD_Identifier into " + dataset.getIdentifier() + "...");
                 datacitePublisher.updateISOMetadata();
-                LOG.log(Level.INFO,
+                logger.log(Level.INFO,
                         "Added doi MD_Identifier");
                 datasetText = new StringBuilder(datacitePublisher.getISOMetadata());
             } catch (InvalidMetadataException ex) {
-                LOG.log(Level.INFO, ex.getMessage());
+                logger.log(Level.INFO, ex.getMessage());
             }
         }
         translator = null;
@@ -693,7 +694,7 @@ public class ISO19115DatasetPrinter implements Serializable {
             message.append(
                     " not overwritten because the new file is identical (except for gml:id and the metadata timestamp)");
         }
-        LOG.log(Level.INFO, message.toString());
+        logger.log(Level.INFO, message.toString());
         dataset = null;
     }
 }

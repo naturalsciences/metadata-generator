@@ -29,7 +29,7 @@ import org.xml.sax.SAXException;
  */
 public class ISO19115StringTranslator {
 
-    public static final Logger LOG =  Logger.getLogger("metadata-generator");
+    public static final Logger LOG = Logger.getLogger(ISO19115StringTranslator.class.getSimpleName());
 
     private static final Map<String, String> LOCALE_MAP;
 

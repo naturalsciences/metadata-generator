@@ -13,6 +13,7 @@ import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class DistributionResource implements IDistributionResource {
 
@@ -44,6 +45,8 @@ public class DistributionResource implements IDistributionResource {
         this.onlineResourceIdentifier = onlineResourceIdentifier;
         this.onlineResourceDescription = onlineResourceDescription;
     }
+
+
 
     @Override
     public OnlinePossibilityEnum getFunction() {
