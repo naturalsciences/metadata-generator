@@ -5,15 +5,15 @@
  */
 package be.naturalsciences.bmdc.metadata.model.impl;
 
-import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
-import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
-import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
-import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
-import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
 import java.net.URL;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+
+import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
+import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
+import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
+import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
+import be.naturalsciences.bmdc.metadata.model.ProtocolEnum;
 
 public class DistributionResource implements IDistributionResource {
 
