@@ -5,15 +5,16 @@
  */
 package be.naturalsciences.bmdc.metadata.model.impl;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 import be.naturalsciences.bmdc.metadata.model.IDatasource;
 import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
 import be.naturalsciences.bmdc.metadata.model.IParameter;
 import be.naturalsciences.bmdc.metadata.model.IPlatform;
 import be.naturalsciences.bmdc.metadata.model.IProject;
 import be.naturalsciences.bmdc.metadata.model.IRegion;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 public class Datasource implements IDatasource {
 
@@ -32,6 +33,7 @@ public class Datasource implements IDatasource {
     private String bibliographicReference;
     private String spatialRepresentation;
     private Double spatialResolutionDistance;
+    private Long spatialResolutionScale;
 
     public String getTitle() {
         return title;
@@ -175,6 +177,16 @@ public class Datasource implements IDatasource {
     @Override
     public void setSpatialResolutionDistance(Double spatialResolutionDistance) {
         this.spatialResolutionDistance = spatialResolutionDistance;
+    }
+
+    @Override
+    public Long getSpatialResolutionScale() {
+        return this.spatialResolutionScale;
+    }
+
+    @Override
+    public void setSpatialResolutionScale(Long spatialResolutionScale) {
+        this.spatialResolutionScale = spatialResolutionScale;
     }
 
 }

@@ -5,18 +5,8 @@
  */
 package be.naturalsciences.bmdc.metadata.iso;
 
-import be.naturalsciences.bmdc.metadata.model.comparator.GeographicDescriptionComparator;
-import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
-import be.naturalsciences.bmdc.metadata.model.IDataset;
-import be.naturalsciences.bmdc.metadata.model.IRegion;
-import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
-import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
-import be.naturalsciences.bmdc.metadata.model.IDatasource;
-import be.naturalsciences.bmdc.metadata.model.IKeyword;
-import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
-import be.naturalsciences.bmdc.metadata.model.Thesaurus;
-import be.naturalsciences.bmdc.metadata.model.comparator.DatasourceComparator;
-import gnu.trove.set.hash.THashSet;
+import static java.util.Collections.singleton;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -26,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import static java.util.Collections.singleton;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -37,11 +26,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalDouble;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.sis.internal.jaxb.gmx.Anchor;
 import org.apache.sis.internal.jaxb.metadata.replace.ReferenceSystemMetadata;
@@ -70,6 +61,7 @@ import org.apache.sis.metadata.iso.identification.DefaultAggregateInformation;
 import org.apache.sis.metadata.iso.identification.DefaultBrowseGraphic;
 import org.apache.sis.metadata.iso.identification.DefaultDataIdentification;
 import org.apache.sis.metadata.iso.identification.DefaultKeywords;
+import org.apache.sis.metadata.iso.identification.DefaultRepresentativeFraction;
 import org.apache.sis.metadata.iso.identification.DefaultResolution;
 import org.apache.sis.metadata.iso.lineage.DefaultLineage;
 import org.apache.sis.metadata.iso.quality.DefaultConformanceResult;
@@ -107,6 +99,19 @@ import org.opengis.metadata.quality.Scope;
 import org.opengis.metadata.spatial.SpatialRepresentationType;
 //import org.opengis.temporal.Period;
 import org.opengis.util.InternationalString;
+
+import be.naturalsciences.bmdc.metadata.model.IDataset;
+import be.naturalsciences.bmdc.metadata.model.IDatasource;
+import be.naturalsciences.bmdc.metadata.model.IDistributionFormat;
+import be.naturalsciences.bmdc.metadata.model.IDistributionResource;
+import be.naturalsciences.bmdc.metadata.model.IInstituteRole;
+import be.naturalsciences.bmdc.metadata.model.IKeyword;
+import be.naturalsciences.bmdc.metadata.model.IRegion;
+import be.naturalsciences.bmdc.metadata.model.OnlinePossibilityEnum;
+import be.naturalsciences.bmdc.metadata.model.Thesaurus;
+import be.naturalsciences.bmdc.metadata.model.comparator.DatasourceComparator;
+import be.naturalsciences.bmdc.metadata.model.comparator.GeographicDescriptionComparator;
+import gnu.trove.set.hash.THashSet;
 
 /**
  * A class responsible to create a complete ISO 19115:2003/19139 Metadata
@@ -1087,20 +1092,37 @@ public class ISO19115DatasetBuilder {
 
         identification.setSpatialRepresentationTypes(singleton(buildSpatialRepresentationType()));
 
-        OptionalDouble max = datasources.stream().map(ds -> ds.getSpatialResolutionDistance())
+        OptionalDouble maxDistance = datasources.stream().map(ds -> ds.getSpatialResolutionDistance())
                 .filter(ds -> Objects.nonNull(ds))
                 .collect(Collectors.toList())
                 .stream().mapToDouble(Double::doubleValue)
                 .max();
-        if (max.isPresent()) {
-            identification.setSpatialResolutions(singleton(buildSpatialResolutionType(max.getAsDouble())));
+        if (maxDistance.isPresent()) {
+            identification.setSpatialResolutions(singleton(buildSpatialResolutionDistance(maxDistance.getAsDouble())));
+        }
+
+        OptionalLong maxScale = datasources.stream().map(ds -> ds.getSpatialResolutionScale())
+                .filter(ds -> Objects.nonNull(ds))
+                .collect(Collectors.toList())
+                .stream().mapToLong(Long::longValue)
+                .max();
+        if (maxScale.isPresent()) {
+            identification.setSpatialResolutions(singleton(buildSpatialResolutionScale(maxScale.getAsLong())));
         }
         return identification;
     }
 
-    private Resolution buildSpatialResolutionType(double distance) {
+    private Resolution buildSpatialResolutionDistance(double distance) {
         DefaultResolution r = new DefaultResolution();
         r.setDistance(distance);
+        return r;
+    }
+
+    private Resolution buildSpatialResolutionScale(long scale) {
+        DefaultResolution r = new DefaultResolution();
+        DefaultRepresentativeFraction representativeFraction = new DefaultRepresentativeFraction();
+        representativeFraction.setDenominator(scale);
+        r.setEquivalentScale(representativeFraction);
         return r;
     }
 

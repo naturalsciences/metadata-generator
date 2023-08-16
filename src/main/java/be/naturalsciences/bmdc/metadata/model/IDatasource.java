@@ -75,4 +75,8 @@ public interface IDatasource extends Serializable {
     public Double getSpatialResolutionDistance();
 
     public void setSpatialResolutionDistance(Double spatialResolutionDistance);
+
+    public Long getSpatialResolutionScale();
+
+    public void setSpatialResolutionScale(Long spatialResolutionScale);
 }
