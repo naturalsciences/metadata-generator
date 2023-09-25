@@ -59,4 +59,6 @@ public interface IDistributionResource extends Serializable {
 
     public void setOnlineResourceName(String onlineResourceName);
 
+    public boolean displayDataFormat();
+
 }

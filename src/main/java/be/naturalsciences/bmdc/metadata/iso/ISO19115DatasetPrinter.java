@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -62,9 +63,9 @@ public class ISO19115DatasetPrinter implements Serializable {
     private ISO19115StringTranslator translator;
     private Map<String, Set<LocalizedString>> extraTranslations;
     private boolean hasPrinted = false;
-    private boolean needsUpdate = false;
     private boolean inspire;
     private ISO19115DatasetBuilder builder;
+    private boolean needsUpdate = false;
 
     private static Document GEMET_DOCUMENT;
 
@@ -140,12 +141,12 @@ public class ISO19115DatasetPrinter implements Serializable {
         return this.datasetText.toString();
     }
 
-    public boolean hasPrinted() {
-        return hasPrinted;
-    }
-
     public boolean needsUpdate() {
         return needsUpdate;
+    }
+
+    public boolean hasPrinted() {
+        return hasPrinted;
     }
 
     public ISO19115toDataCitePublisher getDatacitePublisher() {
@@ -157,15 +158,6 @@ public class ISO19115DatasetPrinter implements Serializable {
             boolean inspire, Logger logger) throws JAXBException {
         this.logger = logger;
         this.builder = builder;
-        IDataset dataset = builder.getDataset();
-        DefaultMetadata metadata = builder.getMetadataDocument();
-
-        if (dataset == null) {
-            throw new IllegalArgumentException("Provided dataset argument is null.");
-        }
-        if (metadata == null) {
-            throw new IllegalArgumentException("Provided metadata argument is null.");
-        }
         this.datacitePublisher = datacitePublisher;
         this.keywordLanguages = keywordLanguages;
         this.inspire = inspire;
@@ -221,6 +213,8 @@ public class ISO19115DatasetPrinter implements Serializable {
         long startTime = System.currentTimeMillis();
         logger.log(Level.INFO,
                 "Marshalling XML for dataset " + dataset.getIdentifier() + "...");
+
+        DefaultMetadata metadata = builder.getMetadataDocument();
         String xml = XML.marshal(metadata);
         long endTime = System.currentTimeMillis();
         logger.log(Level.INFO,
@@ -400,11 +394,6 @@ public class ISO19115DatasetPrinter implements Serializable {
         Date start = dataset.getStartDate();
         Date end = dataset.getEndDate();
 
-        // replaceAll("\n", " "); //flatten everything!
-        /*
-         * replaceAll("\t", " ");
-         * replaceAll("> *<", "><");
-         */
         String temporalInfo = null;
         if (start != null) {
             SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -572,49 +561,6 @@ public class ISO19115DatasetPrinter implements Serializable {
         replace("</exp>", "");
     }
 
-    /**
-     * *
-     * Verify whether two ISO 19115:2004 xml documents equal each other,
-     * ignoring the creation dates
-     *
-     * @param xml1
-     * @param xml2
-     * @return
-     */
-    private boolean resultEquals(String xml1, String xml2) {
-        Map<Pattern, String> repl = new LinkedHashMap<>(); // maintain insertion order!
-        String comp1 = StringUtils.flattenString(xml1);
-        String comp2 = StringUtils.flattenString(xml2);
-        Pattern dates = Pattern.compile("<gmd:dateStamp><gco:DateTime>.*?<\\/gco:DateTime><\\/gmd:dateStamp>");
-        Pattern gmlId = Pattern.compile("gml:id=\".*?\"");
-        repl.put(dates, "");
-        repl.put(gmlId, "");
-        comp1 = StringUtils.replaceAll(comp1, repl);
-        comp2 = StringUtils.replaceAll(comp2, repl);
-
-        return comp1.equals(comp2);
-    }
-
-    /**
-     * *
-     * Verify whether two ISO 19115:2004 xml documents equal each other,
-     * ignoring the gmd:datestamp dates and different values for gml:ids
-     *
-     * @param xml1
-     * @param xml2
-     * @return
-     */
-    @Override
-    public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        } else if (other instanceof ISO19115DatasetPrinter) {
-            ISO19115DatasetPrinter otherPrinter = (ISO19115DatasetPrinter) other;
-            return resultEquals(this.print(), otherPrinter.print());
-        }
-        return false;
-    }
-
     private void replace(String from, String to) {
         datasetText = StringUtils.stringBuilderReplace(datasetText, from, to);
     }
@@ -632,6 +578,27 @@ public class ISO19115DatasetPrinter implements Serializable {
     }
 
     /**
+     * Compare two ISO 19115 XML strings using the compare() logic given optionally a set of regex Strings that are replaced in both stringss.   
+     * @param xml1
+     * @param xml2
+     * @param exceptions
+     * @return
+     */
+    public static int compare(String xml1, String xml2, List<String> exceptions) {
+        String flattenedXml1 = StringUtils.flattenString(xml1);
+        String flattenedXml2 = StringUtils.flattenString(xml2);
+        if (exceptions == null || exceptions.isEmpty()) {
+            return flattenedXml1.compareTo(flattenedXml2);
+        } else {
+            for (String exception : exceptions) {
+                flattenedXml1 = flattenedXml1.replaceAll(exception, "");
+                flattenedXml2 = flattenedXml2.replaceAll(exception, "");
+            }
+            return flattenedXml1.compareTo(flattenedXml2);
+        }
+    }
+
+    /**
      * *
      * Write the given metadata content to the given File if the original file
      * should be overwritten. File should not be a path. alwaysOverwrite=true: a
@@ -646,53 +613,48 @@ public class ISO19115DatasetPrinter implements Serializable {
      * @throws FileNotFoundException
      */
     public void createFile(File file, boolean alwaysOverwrite) throws FileNotFoundException {
-
         String newXml = print();
 
-        String existingXml = null;
         StringBuilder message = new StringBuilder("File ");
         message.append(file.getName());
-        try {
-            existingXml = FileUtils.readFileToString(file, "UTF-8");
-            needsUpdate = !resultEquals(existingXml, newXml);
-        } catch (IOException ex) {
-            needsUpdate = true;
-        }
-
-        if (alwaysOverwrite || needsUpdate) {
-            hasPrinted = true;
-            if (alwaysOverwrite) {
-                message.append(" overwritten because method called with alwaysOverwrite=true.");
-            }
-            if (needsUpdate) {
-                if (existingXml == null) {
-                    message.append(" created for the first time.");
-                } else {
-
-                    String flattenedExistingXml = StringUtils.flattenString(existingXml);
-                    String flattenedNewXml = StringUtils.flattenString(newXml);
-                    // List<String> diffs = StringUtils.findNotMatching(flattenedExistingXml,
-                    // flattenedNewXml);
-                    message.append(
-                            " overwritten because updates where needed. All differences (gml:id and timestamps were ignored):");
-                    message.append("\n");
-                    /*
-                     * for (String diff : diffs) {
-                     * message.append("----\n");
-                     * message.append(diff);
-                     * message.append("----\n");
-                     * }
-                     */
-                }
-
-            }
+        if (alwaysOverwrite) {
+            message.append(" overwritten because method called with alwaysOverwrite=true.");
             try (PrintWriter out = new PrintWriter(file)) {
                 out.println(newXml);
+                hasPrinted = true;
             }
+        }
 
+        boolean needsCreate = false;
+        String existingXml = null;
+        try {
+            existingXml = FileUtils.readFileToString(file, "UTF-8");
+            List<String> exceptions = new ArrayList<>();
+            exceptions.add("gml32:id=\".*?\"");
+            exceptions.add("<gmd:dateStamp><gco:DateTime>.*?</gco:DateTime></gmd:dateStamp>");
+
+            needsUpdate = compare(newXml, existingXml, exceptions) != 0; //
+        } catch (IOException ex) {
+            needsCreate = true;
+        }
+
+        if (needsCreate) {
+            message.append(" created for the first time.");
+            try (PrintWriter out = new PrintWriter(file)) {
+                out.println(newXml);
+                hasPrinted = true;
+            }
+        }
+        if (needsUpdate) {
+            message.append(" overwritten because updates where needed.");
+
+
+            try (PrintWriter out = new PrintWriter(file)) {
+                out.println(newXml);
+                hasPrinted = true;
+            }
         } else {
-            message.append(
-                    " not overwritten because the new file is identical (except for gml:id and the metadata timestamp)");
+            message.append(" not overwritten because the new file is identical");
         }
         logger.log(Level.INFO, message.toString());
         dataset = null;

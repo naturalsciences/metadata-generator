@@ -174,4 +174,12 @@ public class DistributionResource implements IDistributionResource {
         this.onlineResourceName = onlineResourceName;
     }
 
+
+
+    @Override
+    public boolean displayDataFormat() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'displayDataFormat'");
+    }
+
 }

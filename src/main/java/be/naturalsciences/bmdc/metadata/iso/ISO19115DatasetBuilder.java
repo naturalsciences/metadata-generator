@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -852,6 +853,7 @@ public class ISO19115DatasetBuilder {
 
         dates.add(buildCreationDate(dataset.getCreationDate()));
         dates.add(buildRevisionDate(dataset.getRevisionDate()));
+        dates.add(buildPublicationDate(Date.from(Instant.now())));
 
         citation.setDates(dates);
 
@@ -1045,7 +1047,8 @@ public class ISO19115DatasetBuilder {
         if (dataset.getAbstract() != null) {
             identification.setAbstract(new SimpleInternationalString(dataset.getAbstract()));
         } else {
-            InternationalString abstractString = new SimpleInternationalString("Missing");// NilReason.MISSING.createNilObject(InternationalString.class);
+            InternationalString abstractString = new SimpleInternationalString(
+                    "No abstract has been provided for this dataset.");// NilReason.MISSING.createNilObject(InternationalString.class);
 
             identification.setAbstract(abstractString);
         }
@@ -1274,6 +1277,9 @@ public class ISO19115DatasetBuilder {
                         "http://marineregions.org/mrgid/" + region.getMRGID().toString(), region.getName());
                 descriptions.add(geoDesc);
             }
+        } else {
+            GeographicDescription geoDesc = buildGeographicDescription("Bounding box");
+            descriptions.add(geoDesc);
         }
         extents.addAll(descriptions);
 
@@ -1286,6 +1292,10 @@ public class ISO19115DatasetBuilder {
         } else {
             return new DefaultGeographicDescription(buildCitation(authorityName), name);
         }
+    }
+
+    private GeographicDescription buildGeographicDescription(String name) {
+        return new DefaultGeographicDescription(name);
     }
 
     private DefaultCitation buildThesaurusCitation(Thesaurus thesaurus) {
@@ -1490,7 +1500,7 @@ public class ISO19115DatasetBuilder {
     private Set<Format> buildDumbFormat(Collection<IDistributionResource> distributionResources) {
         Set<IDistributionFormat> formats = distributionResources.stream().map(dr -> dr.getDistributionFormats())
                 .flatMap(l -> l.stream()).collect(Collectors.toCollection(LinkedHashSet::new)); // maintain insertion
-                                                                                                // order
+                                                                                                                                                                                                        // order
         return buildFormat(formats);
     }
 
@@ -1568,10 +1578,10 @@ public class ISO19115DatasetBuilder {
                         if (distributionResource.getOnlineResourceName() != null) {
                             resource.setName(
                                     new SimpleInternationalString(distributionResource.getOnlineResourceName())); // either
-                                                                                                                  // a
-                                                                                                                  // human
-                                                                                                                  // readable
-                                                                                                                  // name
+                                                                                                                                   // a
+                                                                                                                                   // human
+                                                                                                                                   // readable
+                                                                                                                                   // name
                         }
                         // or an identifier on a wfs
                         resource.setProtocol(distributionResource.getOnlineResourceProtocol().getOfficialProtocol());
@@ -1636,7 +1646,7 @@ public class ISO19115DatasetBuilder {
                 DefaultAggregateInformation aggregateInfo = new DefaultAggregateInformation();
                 DefaultCitation citation = buildDatasetCitation(dataset, useLinkedDatasetCitationResponsibleParty,
                         false); // don't print all the responsible parties and the otherCitationDetails of the
-                                // parent dataset.
+                                                                                                                                   // parent dataset.
 
                 aggregateInfo.setAggregateDataSetName(citation);
                 aggregateInfo.setInitiativeType(InitiativeType.COLLECTION);
@@ -1752,7 +1762,8 @@ public class ISO19115DatasetBuilder {
             final Identifier fileIdentifier = new DefaultIdentifier(dataset.getIdentifier());
             metadata.setMetadataIdentifier(fileIdentifier);
 
-            final Date creation = new Date();
+            // final Date creation = new Date();
+            Date creation = Date.from(Instant.MAX);
             metadata.setDateInfo(singleton(new DefaultCitationDate(creation, DateType.CREATION)));
 
             metadata.setMetadataScopes(singleton(DATASET_SCOPE));

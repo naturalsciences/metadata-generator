@@ -59,6 +59,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Ignore;
+import be.naturalsciences.bmdc.metadata.datacite.mds.account.Account;
 
 /**
  *
@@ -106,20 +107,18 @@ public class ISO19115DatasetPrinterTest {
                 BMDC_DISTRIBUTOR = new InstituteRole(IDataset.Role.DISTRIBUTOR, BMDC_EN, BMDC_PHONE, null, RBINS_ADRESS,
                                 BRUSSELS_NAME, BRUSSELS_POSTAL_CODE, BELGIUM_ISO_3166, BMDC_EMAIL, BMDC_WEBSITE);
 
-                TRANSLATIONS
-                                .put(RBINS_ADRESS,
-                                                new HashSet<LocalizedString>(Arrays.asList(new LocalizedString[] {
-                                                                new LocalizedString("Vautierstraat 29",
-                                                                                LANGUAGES.get("NL").get(0)),
-                                                                new LocalizedString("Rue Vautier 29",
-                                                                                LANGUAGES.get("FR").get(0)) })));
+                TRANSLATIONS.put(RBINS_ADRESS,
+                                new HashSet<LocalizedString>(Arrays.asList(new LocalizedString[] {
+                                                new LocalizedString("Vautierstraat 29",
+                                                                LANGUAGES.get("NL").get(0)),
+                                                new LocalizedString("Rue Vautier 29",
+                                                                LANGUAGES.get("FR").get(0)) })));
                 TRANSLATIONS.put(BRUSSELS_NAME,
-                                new HashSet<LocalizedString>(Arrays
-                                                .asList(new LocalizedString[] {
-                                                                new LocalizedString("Brussel",
-                                                                                LANGUAGES.get("NL").get(0)),
-                                                                new LocalizedString("Bruxelles",
-                                                                                LANGUAGES.get("FR").get(0)) })));
+                                new HashSet<LocalizedString>(Arrays.asList(new LocalizedString[] {
+                                                new LocalizedString("Brussel",
+                                                                LANGUAGES.get("NL").get(0)),
+                                                new LocalizedString("Bruxelles",
+                                                                LANGUAGES.get("FR").get(0)) })));
                 TRANSLATIONS.put(BMDC_EN,
                                 new HashSet<LocalizedString>(
                                                 Arrays.asList(new LocalizedString[] {
@@ -132,16 +131,15 @@ public class ISO19115DatasetPrinterTest {
                                                                 new LocalizedString(BMDC_DE,
                                                                                 LANGUAGES.get("DE").get(0)) })));
                 TRANSLATIONS.put(BELGIUM_EN,
-                                new HashSet<LocalizedString>(Arrays
-                                                .asList(new LocalizedString[] {
-                                                                new LocalizedString(BELGIUM_EN,
-                                                                                LANGUAGES.get("EN").get(0)),
-                                                                new LocalizedString(BELGIUM_FR,
-                                                                                LANGUAGES.get("FR").get(0)),
-                                                                new LocalizedString(BELGIUM_NL,
-                                                                                LANGUAGES.get("NL").get(0)),
-                                                                new LocalizedString(BELGIUM_DE,
-                                                                                LANGUAGES.get("DE").get(0)) })));
+                                new HashSet<LocalizedString>(Arrays.asList(new LocalizedString[] {
+                                                new LocalizedString(BELGIUM_EN,
+                                                                LANGUAGES.get("EN").get(0)),
+                                                new LocalizedString(BELGIUM_FR,
+                                                                LANGUAGES.get("FR").get(0)),
+                                                new LocalizedString(BELGIUM_NL,
+                                                                LANGUAGES.get("NL").get(0)),
+                                                new LocalizedString(BELGIUM_DE,
+                                                                LANGUAGES.get("DE").get(0)) })));
         }
 
         public static Dataset createFakeDataset1() {
@@ -308,48 +306,53 @@ public class ISO19115DatasetPrinterTest {
                 Thesaurus keywordThesaurus = keyword.getThesaurus();
 
                 DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-                return ("<gmd:keyword>"
-                                + "            <gmx:Anchor xlink:href=\"" + keyword.getUrl() + "\">"
-                                + keyword.getPrefLabel()
-                                + "</gmx:Anchor>"
-                                + "          </gmd:keyword>"
-                                + "          <gmd:type>"
-                                + "            <gmd:MD_KeywordTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\""
-                                + keyword.getType() + "\">" + keyword.getType().substring(0, 1).toUpperCase()
-                                + keyword.getType().substring(1).toLowerCase() + "</gmd:MD_KeywordTypeCode>\n"
-                                + "          </gmd:type>"
-                                + "          <gmd:thesaurusName>"
-                                + "            <gmd:CI_Citation>"
-                                + "              <gmd:title>"
-                                + keywordThesaurus.getThesaurusUrl() == null
-                                                ? "<gco:CharacterString >" + keywordThesaurus.getThesaurusTitle()
-                                                                + "</gco:CharacterString>"
-                                                : "<gmx:Anchor xlink:href=\"" + keywordThesaurus.getThesaurusUrl()
-                                                                + "\">"
-                                                                + keywordThesaurus.getThesaurusTitle() + "</gmx:Anchor>"
-                                                                + "              </gmd:title>"
-                                                                + "              <gmd:date>"
-                                                                + "                <gmd:CI_Date>"
-                                                                + "                  <gmd:date>"
-                                                                + "                    <gco:Date>"
-                                                                + df.format(keywordThesaurus.getThesaurusDate())
-                                                                + "</gco:Date>"
-                                                                + "                  </gmd:date>"
-                                                                + "                  <gmd:dateType>"
-                                                                + "                    <gmd:CI_DateTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>"
-                                                                + "                  </gmd:dateType>"
-                                                                + "                </gmd:CI_Date>"
-                                                                + "              </gmd:date>"
-                                                                + (keywordThesaurus.getThesaurusVersion() != null
-                                                                                ? "              <gmd:edition>"
-                                                                                                + "                <gco:CharacterString>"
-                                                                                                + keywordThesaurus
-                                                                                                                .getThesaurusVersion()
-                                                                                                + "</gco:CharacterString>"
-                                                                                                + "              </gmd:edition>"
+                return ("<gmd:keyword>" +
+                                "            <gmx:Anchor xlink:href=\"" + keyword.getUrl() + "\">" +
+                                keyword.getPrefLabel() +
+                                "</gmx:Anchor>" +
+                                "          </gmd:keyword>" +
+                                "          <gmd:type>" +
+                                "            <gmd:MD_KeywordTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\""
+                                +
+                                keyword.getType() + "\">" + keyword.getType().substring(0, 1).toUpperCase() +
+                                keyword.getType().substring(1).toLowerCase() + "</gmd:MD_KeywordTypeCode>\n" +
+                                "          </gmd:type>" +
+                                "          <gmd:thesaurusName>" +
+                                "            <gmd:CI_Citation>" +
+                                "              <gmd:title>" +
+                                keywordThesaurus.getThesaurusUrl() == null
+                                                ? "<gco:CharacterString >" + keywordThesaurus.getThesaurusTitle() +
+                                                                "</gco:CharacterString>"
+                                                : "<gmx:Anchor xlink:href=\"" + keywordThesaurus.getThesaurusUrl() +
+                                                                "\">" +
+                                                                keywordThesaurus.getThesaurusTitle() + "</gmx:Anchor>" +
+                                                                "              </gmd:title>" +
+                                                                "              <gmd:date>" +
+                                                                "                <gmd:CI_Date>" +
+                                                                "                  <gmd:date>" +
+                                                                "                    <gco:Date>" +
+                                                                df.format(keywordThesaurus.getThesaurusDate()) +
+                                                                "</gco:Date>" +
+                                                                "                  </gmd:date>" +
+                                                                "                  <gmd:dateType>" +
+                                                                "                    <gmd:CI_DateTypeCode codeList=\"http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>"
+                                                                +
+                                                                "                  </gmd:dateType>" +
+                                                                "                </gmd:CI_Date>" +
+                                                                "              </gmd:date>" +
+                                                                (keywordThesaurus.getThesaurusVersion() != null
+                                                                                ? "              <gmd:edition>" +
+                                                                                                "                <gco:CharacterString>"
+                                                                                                +
+                                                                                                keywordThesaurus.getThesaurusVersion()
+                                                                                                +
+                                                                                                "</gco:CharacterString>"
+                                                                                                +
+                                                                                                "              </gmd:edition>"
                                                                                 : "")
-                                                                + "            </gmd:CI_Citation>"
-                                                                + "          </gmd:thesaurusName>")
+                                                                +
+                                                                "            </gmd:CI_Citation>" +
+                                                                "          </gmd:thesaurusName>")
                                 .replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "");
         }
 
@@ -529,8 +532,8 @@ public class ISO19115DatasetPrinterTest {
                 ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(dst, false, true, false, false, null,
                                 "Belgian Marine Data Centre");
                 File innerTestFile = innerTestCreateFile(builder, builder.getFileName());
-                boolean foundAnchor = FileUtils.findStringInFile(innerTestFile.toPath(), "gmx:Anchor")
-                                && FileUtils.findStringInFile(innerTestFile.toPath(), "gmx:Anchor");
+                boolean foundAnchor = FileUtils.findStringInFile(innerTestFile.toPath(), "gmx:Anchor") &&
+                                FileUtils.findStringInFile(innerTestFile.toPath(), "gmx:Anchor");
                 assertTrue(foundAnchor);
         }
 
@@ -570,6 +573,72 @@ public class ISO19115DatasetPrinterTest {
                 printer.createFile(file, false);
 
                 return file;
+        }
+
+        @Test
+        public void compare() throws JAXBException {
+                /*ISO19115DatasetBuilder builder = new ISO19115DatasetBuilder(ds2, false, true, false, false, null,
+                                "Belgian Marine Data Centre");
+                ISO19115DatasetPrinter printer = new ISO19115DatasetPrinter(builder,
+                                new HashSet<>(Arrays.asList(new String[] { "EN", "NL", "FR", "DE" })), TRANSLATIONS,
+                                null, false, Logger.getAnonymousLogger());*/
+                String xml1 = "<gmd:MD_Metadata xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/iso/19139/20070417/gmd/gmd.xsd http://www.isotc211.org/2005/gmx http://schemas.opengis.net/iso/19139/20070417/gmx/gmx.xsd\">"
+                                +
+                                "	<gmd:fileIdentifier>" +
+                                "		<gco:CharacterString>bmdc.be:dataset:1937</gco:CharacterString>" +
+                                "	</gmd:fileIdentifier>" +
+                                "	<gmd:dateStamp>" +
+                                "		<gco:DateTime>2023-09-25T14:54:46.332+02:00</gco:DateTime>" +
+                                "	</gmd:dateStamp>" +
+                                "	<gmd:extent>" +
+                                "		<gmd:temporalElement>" +
+                                "			<gmd:EX_TemporalExtent>" +
+                                "				<gmd:extent>" +
+                                "					<gml32:TimePeriod gml32:id=\"IDb7123536-4a7f-413c-8da7-1dd012303f0e\" xsi:type=\"gml32:TimePeriodType\">"
+                                +
+                                "						<gml32:beginPosition>1970-01-01</gml32:beginPosition>" +
+                                "						<gml32:endPosition>1976-12-31</gml32:endPosition>" +
+                                "					</gml32:TimePeriod>" +
+                                "				</gmd:extent>" +
+                                "			</gmd:EX_TemporalExtent>" +
+                                "		</gmd:temporalElement>" +
+                                "	</gmd:EX_Extent>" +
+                                "</gmd:extent>" +
+                                "</gmd:MD_Metadata>";
+                String xml2 = "<gmd:MD_Metadata xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://schemas.opengis.net/iso/19139/20070417/gmd/gmd.xsd http://www.isotc211.org/2005/gmx http://schemas.opengis.net/iso/19139/20070417/gmx/gmx.xsd\">"
+                                +
+                                "	<gmd:fileIdentifier>" +
+                                "		<gco:CharacterString>bmdc.be:dataset:1937</gco:CharacterString>" +
+                                "	</gmd:fileIdentifier>" +
+                                "	<gmd:dateStamp>" +
+                                "		<gco:DateTime>2023-09-26T17:00:15.127+02:00</gco:DateTime>" +
+                                "	</gmd:dateStamp>" +
+                                "	<gmd:extent>" +
+                                "		<gmd:temporalElement>" +
+                                "			<gmd:EX_TemporalExtent>" +
+                                "				<gmd:extent>" +
+                                "					<gml32:TimePeriod gml32:id=\"ID1f007876-bac9-41f4-ac56-23e2b0e3a875\" xsi:type=\"gml32:TimePeriodType\">"
+                                +
+                                "						<gml32:beginPosition>1970-01-01</gml32:beginPosition>" +
+                                "						<gml32:endPosition>1976-12-31</gml32:endPosition>" +
+                                "					</gml32:TimePeriod>" +
+                                "				</gmd:extent>" +
+                                "			</gmd:EX_TemporalExtent>" +
+                                "		</gmd:temporalElement>" +
+                                "	</gmd:EX_Extent>" +
+                                "</gmd:extent>" +
+                                "</gmd:MD_Metadata>";
+                List<String> exceptions = null;
+                int expected = -1;
+                int actual = ISO19115DatasetPrinter.compare(xml1, xml2, exceptions);
+                assertEquals(expected, actual);
+                exceptions = new ArrayList<>();
+                exceptions.add("gml32:id=\".*?\"");
+
+                exceptions.add("<gmd:dateStamp><gco:DateTime>.*?</gco:DateTime></gmd:dateStamp>");
+                expected = 0;
+                actual = ISO19115DatasetPrinter.compare(xml1, xml2, exceptions);
+                assertEquals(expected, actual);
         }
 
 }
