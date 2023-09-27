@@ -841,7 +841,7 @@ public class ISO19115DatasetBuilder {
      * @param addResponsibleParties   Whether or not a gmd:CI_Citation needs a
      *                                gmd:citedResponsibleParty
      * @param addOtherCitationDetails Whether or not gmd:CI_Citation needs a a
-     *                                concatanetion of the underlying data sources
+     *                                concatenation of the underlying data sources
      * @return
      */
     private DefaultCitation buildDatasetCitation(IDataset dataset, boolean addResponsibleParties,
@@ -1762,8 +1762,7 @@ public class ISO19115DatasetBuilder {
             final Identifier fileIdentifier = new DefaultIdentifier(dataset.getIdentifier());
             metadata.setMetadataIdentifier(fileIdentifier);
 
-            // final Date creation = new Date();
-            Date creation = Date.from(Instant.MAX);
+            final Date creation = new Date();
             metadata.setDateInfo(singleton(new DefaultCitationDate(creation, DateType.CREATION)));
 
             metadata.setMetadataScopes(singleton(DATASET_SCOPE));

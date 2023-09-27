@@ -258,7 +258,59 @@ public class ISO19115DatasetPrinterTest {
                                 "Dataset combined from sources. Descriptive staistical analysis performed.", themes,
                                 null,
                                 IDataset.SpatialType.TEXT_TABLE, createKeywords());
-                Set<LocalizedString> titles = new HashSet<>();
+                Set<LocalizedString> titles = new LinkedHashSet<>();
+                titles.add(
+                                new LocalizedString("Les données du dataset 'Advanced modelling and research on...'",
+                                                Locale.FRENCH));
+                titles.add(new LocalizedString("Die daten datasets 'Advanced modelling and research on...'",
+                                Locale.GERMAN));
+                dst.setMultilingualTitles(titles);
+                dst.setPointsOfContact(singleton(BMDC_CUSTODIAN));
+                dst.setBrowseGraphicUrl(MSFD_IMAGE);
+                return dst;
+        }
+
+        public static IDataset createFakeDataset2Copy() throws MalformedURLException {
+                Date publicationDate1 = new GregorianCalendar(2008, Calendar.DECEMBER, 10).getTime();
+                Date publicationDate2 = new GregorianCalendar(2009, Calendar.JANUARY, 10).getTime();
+
+                Date creationDate = new GregorianCalendar(2016, Calendar.DECEMBER, 1).getTime();
+                Date revisionDate = new GregorianCalendar(2016, Calendar.DECEMBER, 10).getTime();
+
+                Date startDate = new GregorianCalendar(2005, Calendar.JANUARY, 1).getTime();
+                Date endDate = new GregorianCalendar(2008, Calendar.JANUARY, 1).getTime();
+
+                IInstituteRole author = new InstituteRole(IDataset.Role.AUTHOR, "MARECO", "02/545542", null,
+                                "Vautierstraat 29",
+                                "Brussel", "1000", "BE", "info@bmdc.be", "http://www.naturalsciences.be");
+                IInstituteRole originator = new InstituteRole(IDataset.Role.ORIGINATOR, "VLIZ", "059/65466546", null,
+                                "Wandelaarkaai 7", "Oostende", "8400", "BE", "info@vliz.be", "http://www.vliz.be");
+                List<IInstituteRole> parties = new ArrayList<>();
+                parties.add(author);
+                parties.add(originator);
+                IDatasource dso = new Datasource("Advanced modelling and research on...", null, "bmdc:dso::2200",
+                                publicationDate1, "Degraer, Haelters, Reubens", parties,
+                                new HashSet<>(Arrays.asList("NL", "EN")), null,
+                                null, null, null, null);
+                IDatasource dso2 = new Datasource("Final report on modelling and research on...", null,
+                                "bmdc:dso::2201",
+                                publicationDate2, "Degraer, Rumes, Fettweis", parties,
+                                new HashSet<>(Arrays.asList("EN")), null, null,
+                                null, null, null);
+                List<IDatasource> sources = new ArrayList<>();
+                sources.add(dso);
+                sources.add(dso2);
+
+                Set<IDataset.InspireTheme> themes = new THashSet<>();
+                Dataset dst = new Dataset("bmdc:dst::5021", "Data from 'Advanced modelling and research on...'",
+                                creationDate,
+                                revisionDate, new HashSet<>(Arrays.asList("NL", "EN")), "4326", null, null, sources,
+                                "Dataset combined from two publications. Contains parameters on salinity, temperature, biota composition and mainly biodiversity. Gathered from 2005 to 2008. Belgica research vessel during cruises...",
+                                startDate, endDate, 50.0, 52.0, 2.0, 3.0, null,
+                                "Dataset combined from sources. Descriptive staistical analysis performed.", themes,
+                                null,
+                                IDataset.SpatialType.TEXT_TABLE, createKeywords());
+                Set<LocalizedString> titles = new LinkedHashSet<>();
                 titles.add(
                                 new LocalizedString("Les données du dataset 'Advanced modelling and research on...'",
                                                 Locale.FRENCH));
@@ -382,20 +434,17 @@ public class ISO19115DatasetPrinterTest {
         public void testGetResult() throws IOException, FileNotFoundException, JAXBException {
                 Dataset ds1 = createFakeDataset1();
                 IDataset ds2 = createFakeDataset2();
-                // testXML(ds1);
-                // testNoAnchor(ds1);
-                /*
-                 * testAnchor(ds1);
-                 * 
-                 * 
-                 * testXML(ds2);
-                 * testDOI(ds2);
-                 * // testNoAnchor(ds2);
-                 * testAnchor(ds2);
-                 * testTranslatedTitle(ds2);
-                 * testAnchorForLaw(ds2);
-                 */
+                testXML(ds1);
+                testNoAnchor(ds1);
+                testAnchor(ds1);
                 testCitation(ds1);
+
+                testXML(ds2);
+                testDOI(ds2);
+                testNoAnchor(ds2);
+                testAnchor(ds2);
+                testTranslatedTitle(ds2);
+                testAnchorForLaw(ds2);
         }
 
         private void testCitation(IDataset ds2) throws JAXBException {
@@ -568,7 +617,7 @@ public class ISO19115DatasetPrinterTest {
                                                 Logger.getAnonymousLogger()),
                                 false, Logger.getAnonymousLogger());
                 File file = File.createTempFile(fileName, ".xml");
-                Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Test file stored at " + file.getPath());
+                Logger.getLogger(this.getClass().getName()).info("Test file stored at " + file.getPath());
 
                 printer.createFile(file, false);
 
@@ -634,11 +683,55 @@ public class ISO19115DatasetPrinterTest {
                 assertEquals(expected, actual);
                 exceptions = new ArrayList<>();
                 exceptions.add("gml32:id=\".*?\"");
-
                 exceptions.add("<gmd:dateStamp><gco:DateTime>.*?</gco:DateTime></gmd:dateStamp>");
                 expected = 0;
                 actual = ISO19115DatasetPrinter.compare(xml1, xml2, exceptions);
                 assertEquals(expected, actual);
+        }
+
+        public void innerCompare(IDataset ds1, IDataset ds2, int expected)
+                        throws JAXBException, MalformedURLException, InterruptedException {
+                ISO19115DatasetBuilder builder1 = new ISO19115DatasetBuilder(ds1, false, true, false, false, null,
+                                "Belgian Marine Data Centre");
+                ISO19115DatasetBuilder builder2 = new ISO19115DatasetBuilder(ds2, false, true, false, false, null,
+                                "Belgian Marine Data Centre");
+                ISO19115DatasetPrinter printer1 = new ISO19115DatasetPrinter(builder1,
+                                new HashSet<>(Arrays.asList(new String[] { "EN", "NL", "FR", "DE" })), TRANSLATIONS,
+                                null, false, Logger.getAnonymousLogger());
+                Thread.sleep(20 * 1000);
+                ISO19115DatasetPrinter printer2 = new ISO19115DatasetPrinter(builder2,
+                                new HashSet<>(Arrays.asList(new String[] { "EN", "NL", "FR", "DE" })), TRANSLATIONS,
+                                null, false, Logger.getAnonymousLogger());
+                List<String> exceptions = new ArrayList<>();
+                exceptions.add("gml32:id=\".*?\"");
+                exceptions.add("<gmd:dateStamp><gco:DateTime>.*?</gco:DateTime></gmd:dateStamp>");
+                exceptions.add("<gmd:date><gmd:CI_Date><gmd:date><gco:Date>.*?</gco:Date></gmd:date><gmd:dateType><gmd:CI_DateTypeCodecodeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\"codeListValue=\"publication\">Publication</gmd:CI_DateTypeCode></gmd:dateType></gmd:CI_Date></gmd:date>");
+                exceptions.add("<gmd:date><gmd:CI_Date><gmd:date><gco:DateTime>.*?</gco:DateTime></gmd:date><gmd:dateType><gmd:CI_DateTypeCodecodeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\"codeListValue=\"publication\">Publication</gmd:CI_DateTypeCode></gmd:dateType></gmd:CI_Date></gmd:date>");
+
+                String xml1 = printer1.print();
+                Thread.sleep(20 * 1000);
+                String xml2 = printer2.print();
+                int actual = ISO19115DatasetPrinter.compare(xml1, xml2, exceptions);
+                if (expected != actual) {
+                        String flattenedXml1 = StringUtils.flattenString(xml1).replaceAll("[ \\t]{1,}", "");
+                        String flattenedXml2 = StringUtils.flattenString(xml2).replaceAll("[ \\t]{1,}", "");
+                        for (String exception : exceptions) {
+                                flattenedXml1 = flattenedXml1.replaceAll(exception, "");
+                                flattenedXml2 = flattenedXml2.replaceAll(exception, "");
+                        }
+                        System.out.println(flattenedXml1);
+                        System.out.println(flattenedXml2);
+                }
+                assertEquals(expected, actual);
+        }
+
+        @Test
+        public void compare2() throws JAXBException, MalformedURLException, InterruptedException {
+                IDataset ds1 = createFakeDataset2();
+                IDataset ds2 = createFakeDataset2Copy();
+                innerCompare(ds1, ds2, 0);
+                ds2.setAbstract("Dataset combined from five publications. Contains parameters on salinity, temperature, biota composition and mainly biodiversity. Gathered from 2005 to 2008. Belgica research vessel during cruises...");
+                innerCompare(ds1, ds2, 14);
         }
 
 }

@@ -121,7 +121,7 @@ public class PostIsoMetadataTest {
             assertEquals(getCode, doiResponse.getResponseCode()); // 200/404
             assertTrue(doiResponse.toString().contains("http://metadata.naturalsciences.be/" + id));
         } catch (InvalidMetadataException ex) {
-            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).log(Level.INFO, ex.getMessage());
+            Logger.getLogger(ISO19115DatasetPrinter.class.getName()).info(ex.getMessage());
         }
     }
 }

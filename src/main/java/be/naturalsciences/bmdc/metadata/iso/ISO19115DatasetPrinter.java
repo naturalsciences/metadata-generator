@@ -57,7 +57,7 @@ public class ISO19115DatasetPrinter implements Serializable {
 
     public static final Logger LOG = Logger.getLogger(ISO19115DatasetPrinter.class.getSimpleName());
 
-    private IDataset dataset;
+    //private IDataset dataset;
     private StringBuilder datasetText;
     private Set<String> keywordLanguages;
     private ISO19115StringTranslator translator;
@@ -137,6 +137,8 @@ public class ISO19115DatasetPrinter implements Serializable {
     private ISO19115toDataCitePublisher datacitePublisher;
     private Logger logger;
 
+    private IDataset dataset;
+
     public String print() {
         return this.datasetText.toString();
     }
@@ -156,6 +158,7 @@ public class ISO19115DatasetPrinter implements Serializable {
     public ISO19115DatasetPrinter(ISO19115DatasetBuilder builder, Set<String> keywordLanguages,
             Map<String, Set<LocalizedString>> extraTranslations, ISO19115toDataCitePublisher datacitePublisher,
             boolean inspire, Logger logger) throws JAXBException {
+        this.dataset = builder.getDataset();
         this.logger = logger;
         this.builder = builder;
         this.datacitePublisher = datacitePublisher;
@@ -208,7 +211,6 @@ public class ISO19115DatasetPrinter implements Serializable {
                 }
             }
         }
-        this.dataset = dataset;
 
         long startTime = System.currentTimeMillis();
         logger.log(Level.INFO,
@@ -464,17 +466,8 @@ public class ISO19115DatasetPrinter implements Serializable {
         replaceAll(pattern4, "<gco:CharacterString>$1</gco:CharacterString>");
         replaceAll("\n", "");
         if (inspire) {
-            replace("codeListValue=\"publication\">Publication", "codeListValue=\"publication\">publication"); // not
-                                                                                                               // liked
-                                                                                                               // by the
-                                                                                                               // INSPIRE
-                                                                                                               // validator
-            replaceAll("<gmd:codeSpace> *<gco:CharacterString>EPSG</gco:CharacterString> *</gmd:codeSpace>", ""); // not
-                                                                                                                  // liked
-                                                                                                                  // by
-                                                                                                                  // the
-                                                                                                                  // INSPIRE
-                                                                                                                  // validator
+            //replace("codeListValue=\"publication\">Publication", "codeListValue=\"publication\">publication"); // not liked by the INSPIRE validator
+            replaceAll("<gmd:codeSpace> *<gco:CharacterString>EPSG</gco:CharacterString> *</gmd:codeSpace>", ""); // not liked by the INSPIRE validator
             replaceAll("<gmd:date> *<gco:DateTime>(.*?)T(.*?)</gco:DateTime> *</gmd:date>",
                     "<gmd:date><gco:Date>$1</gco:Date></gmd:date>"); // not liked by the INSPIRE validator
             replaceAll("<gco:CharacterString>No limitations on public access.</gco:CharacterString>",
@@ -528,7 +521,7 @@ public class ISO19115DatasetPrinter implements Serializable {
         }
 
         long endTime = System.currentTimeMillis();
-        logger.log(Level.INFO, "Cleanup and translation took " + (endTime - startTime) + " ms");
+        logger.info("Cleanup and translation took " + (endTime - startTime) + " ms");
 
         // this somehow causes every element to receive a PT_FreeText
         // System.out.println("DOM JAVA IMPLEMENTATION: " +
@@ -550,7 +543,7 @@ public class ISO19115DatasetPrinter implements Serializable {
                         "Added doi MD_Identifier");
                 datasetText = new StringBuilder(datacitePublisher.getISOMetadata());
             } catch (InvalidMetadataException ex) {
-                logger.log(Level.INFO, ex.getMessage());
+                logger.info(ex.getMessage());
             }
         }
         translator = null;
@@ -585,17 +578,20 @@ public class ISO19115DatasetPrinter implements Serializable {
      * @return
      */
     public static int compare(String xml1, String xml2, List<String> exceptions) {
-        String flattenedXml1 = StringUtils.flattenString(xml1);
-        String flattenedXml2 = StringUtils.flattenString(xml2);
-        if (exceptions == null || exceptions.isEmpty()) {
-            return flattenedXml1.compareTo(flattenedXml2);
-        } else {
+        String flattenedXml1 = makeComparable(xml1, exceptions);
+        String flattenedXml2 = makeComparable(xml2, exceptions);
+
+        return flattenedXml1.compareTo(flattenedXml2);
+    }
+
+    public static String makeComparable(String xml, List<String> exceptions) {
+        String flattenedXml = StringUtils.flattenString(xml).replaceAll("[ \\t]{1,}", "");
+        if (exceptions != null) {
             for (String exception : exceptions) {
-                flattenedXml1 = flattenedXml1.replaceAll(exception, "");
-                flattenedXml2 = flattenedXml2.replaceAll(exception, "");
+                flattenedXml = flattenedXml.replaceAll(exception, "");
             }
-            return flattenedXml1.compareTo(flattenedXml2);
         }
+        return flattenedXml;
     }
 
     /**
@@ -614,11 +610,10 @@ public class ISO19115DatasetPrinter implements Serializable {
      */
     public void createFile(File file, boolean alwaysOverwrite) throws FileNotFoundException {
         String newXml = print();
-
-        StringBuilder message = new StringBuilder("File ");
-        message.append(file.getName());
+        String fileName = file.getName();
         if (alwaysOverwrite) {
-            message.append(" overwritten because method called with alwaysOverwrite=true.");
+            logger.info(
+                    String.format("File %s overwritten because method called with alwaysOverwrite=true.", fileName));
             try (PrintWriter out = new PrintWriter(file)) {
                 out.println(newXml);
                 hasPrinted = true;
@@ -627,36 +622,43 @@ public class ISO19115DatasetPrinter implements Serializable {
 
         boolean needsCreate = false;
         String existingXml = null;
+        List<String> exceptions = new ArrayList<>();
+        exceptions.add("gml32:id=\".*?\"");
+        exceptions.add("<gmd:dateStamp><gco:DateTime>.*?</gco:DateTime></gmd:dateStamp>");
+        exceptions.add(
+                "<gmd:date><gmd:CI_Date><gmd:date><gco:Date>.*?</gco:Date></gmd:date><gmd:dateType><gmd:CI_DateTypeCodecodeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\"codeListValue=\"publication\">Publication</gmd:CI_DateTypeCode></gmd:dateType></gmd:CI_Date></gmd:date>");
+        exceptions.add(
+                "<gmd:date><gmd:CI_Date><gmd:date><gco:DateTime>.*?</gco:DateTime></gmd:date><gmd:dateType><gmd:CI_DateTypeCodecodeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\"codeListValue=\"publication\">Publication</gmd:CI_DateTypeCode></gmd:dateType></gmd:CI_Date></gmd:date>");
+        String flattenedExistingXml = null;
+        String flattenedNewXml = null;
+
         try {
             existingXml = FileUtils.readFileToString(file, "UTF-8");
-            List<String> exceptions = new ArrayList<>();
-            exceptions.add("gml32:id=\".*?\"");
-            exceptions.add("<gmd:dateStamp><gco:DateTime>.*?</gco:DateTime></gmd:dateStamp>");
-
-            needsUpdate = compare(newXml, existingXml, exceptions) != 0; //
+            flattenedExistingXml = makeComparable(existingXml, exceptions);
+            flattenedNewXml = makeComparable(newXml, exceptions);
+            needsUpdate = compare(newXml, existingXml, exceptions) != 0;
         } catch (IOException ex) {
             needsCreate = true;
         }
 
         if (needsCreate) {
-            message.append(" created for the first time.");
+            logger.info(String.format("File %s created for the first time.", fileName));
             try (PrintWriter out = new PrintWriter(file)) {
                 out.println(newXml);
                 hasPrinted = true;
             }
         }
         if (needsUpdate) {
-            message.append(" overwritten because updates where needed.");
-
-
+            logger.info(String.format("File %s overwritten because updates where needed:", fileName));
+            logger.fine(StringUtils.difference(flattenedExistingXml, flattenedNewXml));
             try (PrintWriter out = new PrintWriter(file)) {
                 out.println(newXml);
                 hasPrinted = true;
             }
         } else {
-            message.append(" not overwritten because the new file is identical");
+            logger.info(String.format("File %s not overwritten because the new file is identical", fileName));
+            logger.fine(StringUtils.difference(flattenedExistingXml, flattenedNewXml));
         }
-        logger.log(Level.INFO, message.toString());
         dataset = null;
     }
 }
