@@ -18,6 +18,10 @@ public enum ProtocolEnum {
     OGC_WFS("OGC:WFS", "A WFS service"),
     OGC_WMS("OGC:WMS", "A WMS service"),
     OGC_WCS("OGC:WCS", "A WCS service"),
+    OGC_WFS2_CAPABILITIES("OGC:WFS-2.0.0-http-get-capabilities", "A WFS service"),
+
+    
+
     DB_POSTGIS("DB:POSTGIS", "A PostGIS connection"),
     WWW_LINK_10_http_opendap("WWW:LINK-1.0-http--opendap", "An OPeNDAP link"),
     WWW_LINK_10_http_link("WWW:LINK-1.0-http--link", "An HTTP link"),
