@@ -101,6 +101,14 @@ public enum FormatEnum {
         public String toString() {
             return "image/tiff";
         }
+    }, TIFF {
+        public String toString() {
+            return "image/tiff";
+        }
+    }, TEXT {
+        public String toString() {
+            return "text/plain";
+        }
     };
 
 }
